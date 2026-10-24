@@ -244,6 +244,22 @@ be exposed. See the [dashboard runbook](docs/ANALYTICS_DASHBOARD.md) and
 [Power BI Desktop model and DAX](docs/POWER_BI.md). A native `.pbix` is not
 provided or claimed to be tested yet.
 
+## Post-backfill data quality report
+
+After loading multiple complete daily windows, run a read-only daily
+reconciliation of staging against the dbt request-grain fact table. It checks
+nonempty date coverage, equal daily row counts and unique fact IDs, and
+separately reports missing operational fields and anomalous closure timestamps.
+A structural PASS **does not** mean NYC source data has zero missing values or
+that API completeness was independently audited.
+
+```powershell
+.\.venv\Scripts\python.exe -m dataforge.quality_report --start 2026-09-01 --end 2026-09-06
+```
+
+With `DATABASE_URL` set, the JSON report is written to the ignored
+`data/runs/quality/` directory. See the [quality-report runbook](docs/DATA_QUALITY_REPORT.md).
+
 ## Architecture and provenance
 
 - [Current and planned architecture](docs/ARCHITECTURE.md)
@@ -252,6 +268,7 @@ provided or claimed to be tested yet.
 - [Prefect flows, local scheduler, test contract and run evidence](docs/PREFECT_ORCHESTRATION.md)
 - [Interactive Streamlit dashboard and BI acceptance](docs/ANALYTICS_DASHBOARD.md)
 - [Power BI Desktop star schema, model relationships and measures](docs/POWER_BI.md)
+- [Read-only data quality and staging/fact reconciliation report](docs/DATA_QUALITY_REPORT.md)
 
 ## Milestones
 
@@ -260,7 +277,7 @@ provided or claimed to be tested yet.
 | 1 | Bounded real API ingestion + tests + CI | Implemented; local tests and small live API check passed |
 | 2 | PostgreSQL staging, replay-safe upserts and integration tests | Implemented; GitHub PostgreSQL CI passed and user confirmed local 100-row load |
 | 3 | dbt transformations, star schema and data quality | Implemented; GitHub dbt CI and user Windows 38/38 local dbt acceptance passed |
-| 4 | Prefect orchestration, retries and observability | Isolated Prefect+PostgreSQL+dbt CI passed; user-provided Windows logs show two successful non-capped single-day source windows (20,066 rows read); historical backfill and scheduler acceptance pending |
+| 4 | Prefect orchestration, retries and observability | Isolated Prefect+PostgreSQL+dbt CI passed; user-provided Windows logs show five successful non-capped daily source windows (50,740 rows read), including a three-day backfill; scheduler and independent database reconciliation pending |
 | 5 | Streamlit/Power BI analytics | Dashboard SQL + Streamlit UI verified in GitHub CI; user-provided Windows screenshot confirms September 2 data and working date selection; native Power BI `.pbix` pending |
 | 6 | Hosting, benchmarking, end-to-end acceptance | Planned |
 
