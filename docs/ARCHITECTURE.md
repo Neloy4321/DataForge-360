@@ -67,6 +67,8 @@ the application does not download the whole fact into Python. The BI contract
 includes a same-grain Power BI relationship map and DAX measure specification;
 native Power BI Desktop report creation remains a Windows task. Location
 clusters are rounded and require at least five requests per group.
+The isolated GitHub PostgreSQL/dbt/dashboard integration test passed, including
+real Streamlit runtime execution over four synthetic warehouse records.
 
 ### Current limitations
 

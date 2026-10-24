@@ -26,7 +26,9 @@ merged commit; the owner then verified the real Windows 100-row Prefect smoke
 run (**38 dbt passes, zero changed rows on replay, succeeded**) on 2026-10-24.
 This is bounded smoke validation, not full-window or scheduler acceptance.
 Phase 5 introduces a read-only Streamlit analytics dashboard and a reproducible
-Power BI Desktop specification, with CI and Windows UI validation tracked separately.
+Power BI Desktop specification. Synthetic PostgreSQL+dbt metrics and the actual
+Streamlit app both passed isolated GitHub Actions CI; Windows visual validation
+and a native `.pbix` report are separate pending tasks.
 
 ## What works today
 
@@ -257,7 +259,7 @@ provided or claimed to be tested yet.
 | 2 | PostgreSQL staging, replay-safe upserts and integration tests | Implemented; GitHub PostgreSQL CI passed and user confirmed local 100-row load |
 | 3 | dbt transformations, star schema and data quality | Implemented; GitHub dbt CI and user Windows 38/38 local dbt acceptance passed |
 | 4 | Prefect orchestration, retries and observability | Isolated Prefect+PostgreSQL+dbt CI passed; Windows bounded 100-row smoke run passed; scheduler/full backfill pending |
-| 5 | Streamlit/Power BI analytics | Streamlit dashboard, read-only SQL and Power BI/DAX specification implemented; isolated CI and Windows visual validation pending |
+| 5 | Streamlit/Power BI analytics | Dashboard SQL + Streamlit UI verified in GitHub PostgreSQL/dbt CI; Windows visual validation and native Power BI `.pbix` pending |
 | 6 | Hosting, benchmarking, end-to-end acceptance | Planned |
 
 ## Privacy and limitations

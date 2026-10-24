@@ -63,7 +63,8 @@ are explicitly Phase 6 tasks.
 
 ## Evidence and unfinished acceptance
 
-Automated CI uses synthetic cases and validates SQL results, privacy grouping,
-and the app runtime. The owner still needs to run the dashboard on Windows,
+Automated GitHub Actions CI passed using synthetic cases, validating SQL results,
+privacy grouping and the real Streamlit app runtime (run `40118189903`).
+The owner still needs to run the dashboard on Windows,
 inspect screenshots and optionally create a native `.pbix` through Power BI
 Desktop. No native PBIX or public Streamlit deployment is asserted here.
