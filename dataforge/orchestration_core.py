@@ -18,6 +18,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 MAX_SCHEDULE_LOOKBACK = 7
+MAX_HISTORICAL_BACKFILL_DAYS = 31
 
 
 class IncompleteWindowError(RuntimeError):
@@ -44,6 +45,24 @@ def previous_complete_days(*, lookback_days: int, today: date | None = None):
     today = today or datetime.now(timezone.utc).date()
     return [(today - timedelta(days=offset), today - timedelta(days=offset - 1))
             for offset in range(lookback_days, 0, -1)]
+
+
+def historical_daily_windows(start: date, end: date) -> list[tuple[date, date]]:
+    """Plan at most 31 explicit source-local daily windows, oldest first.
+
+    The exclusive end is a calendar boundary, not a conversion to UTC.
+    One-day partitions keep the existing manifest completeness gate effective.
+    """
+    if not isinstance(start, date) or not isinstance(end, date):
+        raise ValueError("Backfill start/end must be dates")
+    days = (end - start).days
+    if not 1 <= days <= MAX_HISTORICAL_BACKFILL_DAYS:
+        raise ValueError(
+            f"Backfill must span 1..{MAX_HISTORICAL_BACKFILL_DAYS} days; "
+            "split larger historical ranges into separate runs"
+        )
+    return [(start + timedelta(days=i), start + timedelta(days=i + 1))
+            for i in range(days)]
 
 
 def require_database_environment() -> None:
