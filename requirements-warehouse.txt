@@ -1,0 +1,2 @@
+# Phase 2 only; Phase 1 remains stdlib-only.
+psycopg[binary]>=3.2,<4
