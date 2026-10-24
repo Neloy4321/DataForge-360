@@ -1,6 +1,6 @@
 # DataForge 360
 
-**Enterprise Data Engineering & Analytics Platform — Phases 1–4: ingestion, PostgreSQL, dbt analytics and Prefect**
+**Enterprise Data Engineering & Analytics Platform — NYC 311 · Ingestion · PostgreSQL · dbt · Prefect · BI**
 
 [![Python CI](https://github.com/Neloy4321/DataForge-360/actions/workflows/ci.yml/badge.svg)](https://github.com/Neloy4321/DataForge-360/actions/workflows/ci.yml)
 
@@ -19,10 +19,16 @@ rebuild verification passed GitHub Actions (run 40105753201). The project owner
 independently ran `dbt debug` successfully on Windows and completed the real-data
 dbt build with **38/38 PASS (6 models, 32 tests, 0 warnings/errors)**, including
 `analytics_marts.fct_service_requests` with **100 rows** on 2026-10-24.
-Phase 4 now adds a local-first Prefect flow with task retries, a conservative
+Phase 4 adds a local-first Prefect flow with task retries, a conservative
 incomplete-window guard, replay-safe staging, a dbt quality gate, atomic run
-evidence and an opt-in daily local schedule. Its PostgreSQL+dbt integration
-CI must pass before Phase 4 acceptance. The dashboard remains planned.
+evidence and an opt-in daily local schedule. Five CI jobs passed on its final
+merged commit; the owner then verified the real Windows 100-row Prefect smoke
+run (**38 dbt passes, zero changed rows on replay, succeeded**) on 2026-10-24.
+This is bounded smoke validation, not full-window or scheduler acceptance.
+Phase 5 introduces a read-only Streamlit analytics dashboard and a reproducible
+Power BI Desktop specification. Synthetic PostgreSQL+dbt metrics and the actual
+Streamlit app both passed isolated GitHub Actions CI; Windows visual validation
+and a native `.pbix` report are separate pending tasks.
 
 ## What works today
 
@@ -41,6 +47,8 @@ CI must pass before Phase 4 acceptance. The dashboard remains planned.
 - Assert source uniqueness, star-schema relationships, fact counts and valid durations.
 - Execute ingestion, warehouse load and dbt quality gates as Prefect tasks with
   bounded retries and per-run local evidence; opt in to local daily scheduling.
+- Explore aggregated service-request KPIs, trends, agency/problem rankings and
+  approximate geographic clusters through a bounded read-only Streamlit dashboard.
 
 ## Quick start
 
@@ -214,12 +222,34 @@ cannot be certified complete. For self-hosted daily scheduling, see the
 [Prefect runbook](docs/PREFECT_ORCHESTRATION.md). Scheduling is not activated
 merely by installing or cloning the project.
 
+## Phase 5 — Streamlit dashboard and Power BI-ready analytics
+
+The optional Streamlit app displays actual dbt fact/dimension aggregates—no
+fabricated dashboard numbers or local CSV needed. Date and category filters
+are bound to read-only PostgreSQL SQL; tiny geographic groups are suppressed
+and downloads contain aggregated measures only. With the local container and
+dbt marts ready:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements-warehouse.txt -r requirements-dashboard.txt
+$dbPassword = ((Get-Content .env | Where-Object { $_ -match '^POSTGRES_PASSWORD=' } | Select-Object -First 1) -split '=', 2)[1]
+$env:DATABASE_URL = 'postgresql://dataforge:' + [System.Uri]::EscapeDataString($dbPassword) + '@127.0.0.1:55432/dataforge'
+.\.venv\Scripts\python.exe -m streamlit run dataforge/dashboard_app.py --server.address 127.0.0.1 --server.port 8501
+```
+
+Open `http://127.0.0.1:8501`. No public port, DB password or API key should
+be exposed. See the [dashboard runbook](docs/ANALYTICS_DASHBOARD.md) and
+[Power BI Desktop model and DAX](docs/POWER_BI.md). A native `.pbix` is not
+provided or claimed to be tested yet.
+
 ## Architecture and provenance
 
 - [Current and planned architecture](docs/ARCHITECTURE.md)
 - [Official dataset, data dictionary, selected fields and caveats](docs/DATA_SOURCE.md)
 - [dbt dimensional model, validation and local runbook](docs/DBT_ANALYTICS.md)
 - [Prefect flows, local scheduler, test contract and run evidence](docs/PREFECT_ORCHESTRATION.md)
+- [Interactive Streamlit dashboard and BI acceptance](docs/ANALYTICS_DASHBOARD.md)
+- [Power BI Desktop star schema, model relationships and measures](docs/POWER_BI.md)
 
 ## Milestones
 
@@ -228,8 +258,8 @@ merely by installing or cloning the project.
 | 1 | Bounded real API ingestion + tests + CI | Implemented; local tests and small live API check passed |
 | 2 | PostgreSQL staging, replay-safe upserts and integration tests | Implemented; GitHub PostgreSQL CI passed and user confirmed local 100-row load |
 | 3 | dbt transformations, star schema and data quality | Implemented; GitHub dbt CI and user Windows 38/38 local dbt acceptance passed |
-| 4 | Prefect orchestration, retries and observability | Isolated Prefect+PostgreSQL+dbt integration CI passed (replay and truncation guards); Windows validation pending |
-| 5 | Streamlit/Power BI analytics | Planned |
+| 4 | Prefect orchestration, retries and observability | Isolated Prefect+PostgreSQL+dbt CI passed; Windows bounded 100-row smoke run passed; scheduler/full backfill pending |
+| 5 | Streamlit/Power BI analytics | Dashboard SQL + Streamlit UI verified in GitHub PostgreSQL/dbt CI; Windows visual validation and native Power BI `.pbix` pending |
 | 6 | Hosting, benchmarking, end-to-end acceptance | Planned |
 
 ## Privacy and limitations
