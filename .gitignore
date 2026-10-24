@@ -9,6 +9,7 @@ __pycache__/
 htmlcov/
 data/raw/
 data/processed/
+data/runs/
 logs/
 *.log
 .DS_Store

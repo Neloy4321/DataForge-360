@@ -1,6 +1,6 @@
 # DataForge 360
 
-**Enterprise Data Engineering & Analytics Platform — Phases 1–3: ingestion, PostgreSQL and dbt analytics**
+**Enterprise Data Engineering & Analytics Platform — Phases 1–4: ingestion, PostgreSQL, dbt analytics and Prefect**
 
 [![Python CI](https://github.com/Neloy4321/DataForge-360/actions/workflows/ci.yml/badge.svg)](https://github.com/Neloy4321/DataForge-360/actions/workflows/ci.yml)
 
@@ -19,7 +19,10 @@ rebuild verification passed GitHub Actions (run 40105753201). The project owner
 independently ran `dbt debug` successfully on Windows and completed the real-data
 dbt build with **38/38 PASS (6 models, 32 tests, 0 warnings/errors)**, including
 `analytics_marts.fct_service_requests` with **100 rows** on 2026-10-24.
-Prefect and the dashboard are planned rather than completed features.
+Phase 4 now adds a local-first Prefect flow with task retries, a conservative
+incomplete-window guard, replay-safe staging, a dbt quality gate, atomic run
+evidence and an opt-in daily local schedule. Its PostgreSQL+dbt integration
+CI must pass before Phase 4 acceptance. The dashboard remains planned.
 
 ## What works today
 
@@ -36,6 +39,8 @@ Prefect and the dashboard are planned rather than completed features.
 - Upsert a verified snapshot into PostgreSQL staging without rewriting unchanged rows.
 - Produce dbt staging views, four dimensions, and one request-grain fact table.
 - Assert source uniqueness, star-schema relationships, fact counts and valid durations.
+- Execute ingestion, warehouse load and dbt quality gates as Prefect tasks with
+  bounded retries and per-run local evidence; opt in to local daily scheduling.
 
 ## Quick start
 
@@ -186,11 +191,35 @@ repeatable second build. The CI fixtures are not real research results.
 
 See [dbt model contract and limitations](docs/DBT_ANALYTICS.md).
 
+## Phase 4 — Prefect local orchestration
+
+Prefect is optional and installed in the same isolated project venv. It
+orchestrates bounded API ingestion, validates snapshot completeness and hashes,
+upserts into PostgreSQL, rebuilds dbt analytics, and only then records success.
+Task retries and errors are tracked by Prefect. A run's local JSON evidence
+is saved under the ignored `data/runs/` folder even after failure. No secrets
+or public records are copied into Git.
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements-warehouse.txt -r requirements-dbt.txt -r requirements-prefect.txt
+$dbPassword = ((Get-Content .env | Where-Object { $_ -match '^POSTGRES_PASSWORD=' } | Select-Object -First 1) -split '=', 2)[1]
+$env:DATABASE_URL = 'postgresql://dataforge:' + [System.Uri]::EscapeDataString($dbPassword) + '@127.0.0.1:55432/dataforge'
+$env:DBT_PASSWORD = $dbPassword
+.\.venv\Scripts\python.exe -m dataforge.prefect_pipeline run --start 2026-09-01 --end 2026-09-02 --max-records 100 --page-size 50 --allow-truncated
+```
+
+`--allow-truncated` is **for explicit bounded smoke tests only**. Normal and
+scheduled runs reject date windows reaching the cap because those extracts
+cannot be certified complete. For self-hosted daily scheduling, see the
+[Prefect runbook](docs/PREFECT_ORCHESTRATION.md). Scheduling is not activated
+merely by installing or cloning the project.
+
 ## Architecture and provenance
 
 - [Current and planned architecture](docs/ARCHITECTURE.md)
 - [Official dataset, data dictionary, selected fields and caveats](docs/DATA_SOURCE.md)
 - [dbt dimensional model, validation and local runbook](docs/DBT_ANALYTICS.md)
+- [Prefect flows, local scheduler, test contract and run evidence](docs/PREFECT_ORCHESTRATION.md)
 
 ## Milestones
 
@@ -199,7 +228,7 @@ See [dbt model contract and limitations](docs/DBT_ANALYTICS.md).
 | 1 | Bounded real API ingestion + tests + CI | Implemented; local tests and small live API check passed |
 | 2 | PostgreSQL staging, replay-safe upserts and integration tests | Implemented; GitHub PostgreSQL CI passed and user confirmed local 100-row load |
 | 3 | dbt transformations, star schema and data quality | Implemented; GitHub dbt CI and user Windows 38/38 local dbt acceptance passed |
-| 4 | Prefect orchestration, retries and observability | Planned |
+| 4 | Prefect orchestration, retries and observability | Implemented in code; isolated Prefect+PostgreSQL CI and Windows validation pending |
 | 5 | Streamlit/Power BI analytics | Planned |
 | 6 | Hosting, benchmarking, end-to-end acceptance | Planned |
 
