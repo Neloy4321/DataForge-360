@@ -198,3 +198,5 @@ jobs:
         run: python tests/dashboard_acceptance.py
       - name: Smoke-test the real Streamlit UI
         run: python tests/dashboard_app_smoke.py
+      - name: Verify daily trend categories and suppress midday tick labels
+        run: python tests/dashboard_trend_acceptance.py
