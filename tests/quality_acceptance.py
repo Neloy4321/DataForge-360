@@ -3,7 +3,12 @@
 from __future__ import annotations
 
 import os
+import sys
 from datetime import date
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
 
 from dataforge.quality_report import build_quality_report
 
