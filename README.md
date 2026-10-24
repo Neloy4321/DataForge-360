@@ -228,7 +228,7 @@ merely by installing or cloning the project.
 | 1 | Bounded real API ingestion + tests + CI | Implemented; local tests and small live API check passed |
 | 2 | PostgreSQL staging, replay-safe upserts and integration tests | Implemented; GitHub PostgreSQL CI passed and user confirmed local 100-row load |
 | 3 | dbt transformations, star schema and data quality | Implemented; GitHub dbt CI and user Windows 38/38 local dbt acceptance passed |
-| 4 | Prefect orchestration, retries and observability | Implemented in code; isolated Prefect+PostgreSQL CI and Windows validation pending |
+| 4 | Prefect orchestration, retries and observability | Isolated Prefect+PostgreSQL+dbt integration CI passed (replay and truncation guards); Windows validation pending |
 | 5 | Streamlit/Power BI analytics | Planned |
 | 6 | Hosting, benchmarking, end-to-end acceptance | Planned |
 

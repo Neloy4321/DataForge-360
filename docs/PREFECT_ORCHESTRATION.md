@@ -93,6 +93,8 @@ range before scheduling heavy historical loads; the laptop has 8 GB RAM.
   **synthetic** NYC311-style records, not live production/network data. It
   executes the actual Prefect flow twice, verifies replay-safe upserts and
   dbt facts, then confirms a capped extract is rejected before loading.
+  The automated CI acceptance passed on GitHub Actions; this is not proof of
+  sustained operation or of a user-run Windows deployment.
 - No scheduling service or user-run Prefect flow has yet been accepted on
   Windows. No claims of production availability, live-site alerts, full-data
   throughput or independent operational sign-off are made.
