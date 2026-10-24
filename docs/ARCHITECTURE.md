@@ -1,6 +1,6 @@
 # DataForge 360 architecture
 
-## Current scope: Phase 1 (implemented)
+## Current scope: Phases 1 and 2 (code implemented)
 
 ```mermaid
 flowchart LR
@@ -8,6 +8,8 @@ flowchart LR
     B --> C[Validation and keyset pagination]
     C --> D[Atomic gzip JSONL]
     D --> E[SHA-256 manifest]
+    E --> F[Verified batch loader]
+    F --> G[PostgreSQL staging]
 ```
 
 The ingestion command accepts an inclusive start date, exclusive end date, a
@@ -22,12 +24,18 @@ JSONL bytes. Failed ingestion removes staging files and does not publish the
 incomplete snapshot. These guarantees apply to a single output file and do not
 represent warehouse upsert or a full transactional lakehouse.
 
-### Phase 1 limitations
+Phase 2 adds `staging.service_requests` with `unique_key` as a primary key,
+payload-hash-aware `ON CONFLICT` upserts, a verification pass over the raw
+snapshot and local Docker Compose. It commits in bounded batches. A hosted
+PostgreSQL integration test is included in GitHub Actions; its server-side
+result must be checked before declaring database acceptance.
+
+### Current limitations
 
 - This is a **bounded historical extract**, not a continuous sync.
 - `created_date` filtering cannot capture updates to arbitrarily old records.
   Operational upserts require a later refresh strategy and change reconciliation.
-- No PostgreSQL warehouse, dbt models, Prefect schedule, Power BI report, or
+- No analytics star schema, dbt marts, Prefect schedule, Power BI report, or
   hosted app is implemented yet. Those belong to later milestones.
 - The source publishes timestamps without timezone offsets. Raw values stay
   source-local; future date normalization must specify the timezone and DST policy.

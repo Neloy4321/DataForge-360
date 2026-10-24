@@ -1,6 +1,6 @@
 # DataForge 360
 
-**Enterprise Data Engineering & Analytics Platform — Phase 1: NYC 311 ingestion**
+**Enterprise Data Engineering & Analytics Platform — Phases 1–2: ingestion and PostgreSQL staging**
 
 [![Python CI](https://github.com/Neloy4321/DataForge-360/actions/workflows/ci.yml/badge.svg)](https://github.com/Neloy4321/DataForge-360/actions/workflows/ci.yml)
 
@@ -9,9 +9,10 @@ built around real public NYC 311 service-request data. The end goal is an
 end-to-end platform with ingestion, a PostgreSQL warehouse, dbt transformations,
 Prefect orchestration, quality checks, BI analysis and a web dashboard.
 
-**Status:** The bounded ingestion layer is implemented and tested. The warehouse,
-workflow scheduler, transformations and dashboard are planned and are **not**
-presented as completed features.
+**Status:** The bounded ingestion layer is implemented and locally tested. A
+PostgreSQL staging warehouse with replay-safe upserts has been added in Phase 2;
+its real-database integration check runs in GitHub Actions. A scheduler,
+dbt transformations and the dashboard remain planned, not completed features.
 
 ## What works today
 
@@ -73,11 +74,50 @@ python -m unittest discover -s tests -v
 python -m compileall -q dataforge tests
 ```
 
-During initial development (2026-10-24), the offline suite passed **13/13**
-tests. A live NYC API smoke check successfully fetched 5 records and a second
+During initial development (2026-10-24), the Phase 1 offline suite passed
+**13/13** tests. The expanded Phase 2 suite passed 19 local unit tests, with
+the separate database integration test skipped until PostgreSQL is available.
+A live NYC API smoke check successfully fetched 5 records and a second
 two-page run fetched 7 records, with a manifest and checksum. These small
 integration checks do **not** demonstrate full backfill or production throughput.
-GitHub Actions will independently test the code on each push and pull request.
+GitHub Actions independently tests the code on each push and pull request.
+
+## Phase 2 — PostgreSQL staging warehouse
+
+The optional warehouse loader requires PostgreSQL 16 and Psycopg 3. On Windows,
+keep Docker Desktop open and make sure `docker ps` succeeds first. Use a local
+password that you do not publish. With PowerShell in the repository folder:
+
+```powershell
+Copy-Item .env.example .env
+notepad .env
+```
+
+In `.env`, replace `POSTGRES_PASSWORD` with a strong local password. Then:
+
+```powershell
+docker compose up -d
+python -m pip install -r requirements-warehouse.txt
+python -m dataforge --start 2026-09-01 --end 2026-09-02 --max-records 100 --page-size 50
+```
+
+Set a `DATABASE_URL` environment variable using the **same** local password,
+URL-encoded if it contains reserved URL characters:
+
+```powershell
+$env:DATABASE_URL = "postgresql://dataforge:YOUR_URL_ENCODED_PASSWORD@127.0.0.1:55432/dataforge"
+python -m dataforge.warehouse --input data/raw/nyc311_2026-09-01_2026-09-02.jsonl.gz
+```
+
+The loader creates the staging schema and indexes, verifies the raw snapshot's
+record count and SHA-256, checks every record, and upserts in small transactions.
+Run the same command again: unchanged rows should not be rewritten. A changed
+status in a re-collected snapshot updates the matching `unique_key` without
+creating a second row. The loader reports rows read, changed and unchanged.
+
+PostgreSQL is bound to `127.0.0.1:55432` for local use; Docker data lives in a
+named volume. Do not delete the volume unless you intend to remove local data.
+See [warehouse implementation and limitations](docs/WAREHOUSE.md).
 
 ## Architecture and provenance
 
@@ -88,8 +128,8 @@ GitHub Actions will independently test the code on each push and pull request.
 
 | Stage | Deliverable | Status |
 |---|---|---|
-| 1 | Bounded real API ingestion + tests + CI | Code and tests implemented; CI workflow included |
-| 2 | PostgreSQL staging/warehouse, deduplication and updates | Planned |
+| 1 | Bounded real API ingestion + tests + CI | Implemented; local tests and small live API check passed |
+| 2 | PostgreSQL staging, replay-safe upserts and integration tests | Implemented; server-side CI acceptance pending verification |
 | 3 | dbt transformations, star schema and data quality | Planned |
 | 4 | Prefect orchestration, retries and observability | Planned |
 | 5 | Streamlit/Power BI analytics | Planned |
