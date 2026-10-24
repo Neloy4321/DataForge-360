@@ -1,6 +1,6 @@
 # DataForge 360 architecture
 
-## Current scope: Phases 1 and 2 (code implemented)
+## Current scope: Phases 1–3 (code implemented; dbt acceptance pending)
 
 ```mermaid
 flowchart LR
@@ -10,6 +10,8 @@ flowchart LR
     D --> E[SHA-256 manifest]
     E --> F[Verified batch loader]
     F --> G[PostgreSQL staging]
+    G --> H[dbt staging view]
+    H --> I[Analytics star schema]
 ```
 
 The ingestion command accepts an inclusive start date, exclusive end date, a
@@ -28,15 +30,27 @@ Phase 2 adds `staging.service_requests` with `unique_key` as a primary key,
 payload-hash-aware `ON CONFLICT` upserts, a verification pass over the raw
 snapshot and local Docker Compose. It commits in bounded batches. A hosted
 PostgreSQL integration test is included in GitHub Actions; its server-side
-result must be checked before declaring database acceptance.
+result was successful. The project owner independently loaded and counted 100
+real records locally on Windows on 2026-10-24.
+
+Phase 3 models live in `dbt/`. They never mutate the operational source table.
+Staging normalization feeds `dim_agency`, `dim_borough`, `dim_complaint`,
+`dim_date`, and `fct_service_requests`. The latest known service-request state
+is the fact grain. Relationships, cardinality and derived-duration checks
+execute with `dbt build`; an isolated PostgreSQL CI job uses synthetic inputs
+and verifies expected values plus repeat runs. The CI run result and owner's
+local dbt run must be checked before declaring Phase 3 acceptance.
 
 ### Current limitations
 
 - This is a **bounded historical extract**, not a continuous sync.
 - `created_date` filtering cannot capture updates to arbitrarily old records.
   Operational upserts require a later refresh strategy and change reconciliation.
-- No analytics star schema, dbt marts, Prefect schedule, Power BI report, or
-  hosted app is implemented yet. Those belong to later milestones.
+- Prefect scheduling, Power BI reporting and a hosted app are not yet implemented.
+- dbt tables currently rebuild in full after source updates; this intentionally
+  prioritizes correctness for bounded data over full-scale incremental materialization.
+- The dimension tables are **current-state** views of categories; they are not
+  historical slowly changing dimensions, and no source-event history exists.
 - The source publishes timestamps without timezone offsets. Raw values stay
   source-local; future date normalization must specify the timezone and DST policy.
 - Reaching `max_records` does not establish that all records in the window were
@@ -48,7 +62,7 @@ result must be checked before declaring database acceptance.
 flowchart TD
     A[Source API] --> B[Raw storage]
     B --> C[PostgreSQL staging]
-    C --> D[dbt marts]
+    C --> D[dbt marts — implemented]
     D --> E[Analytics dashboard]
     F[Prefect orchestration] -.-> A
     F -.-> C

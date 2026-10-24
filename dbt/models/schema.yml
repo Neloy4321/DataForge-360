@@ -1,0 +1,96 @@
+version: 2
+
+sources:
+  - name: nyc311
+    description: >
+      Verifiably loaded NYC Open Data 311 snapshot. The operational loader owns
+      this table; dbt must not overwrite the ingestion source.
+    schema: staging
+    tables:
+      - name: service_requests
+        description: Latest loaded state for each NYC service-request identifier.
+        columns:
+          - name: unique_key
+            data_tests: [not_null, unique]
+          - name: created_date
+            data_tests: [not_null]
+
+models:
+  - name: stg_service_requests
+    description: Source-local timestamps and lightly normalized operational fields.
+    columns:
+      - name: service_request_id
+        data_tests: [not_null, unique]
+      - name: created_at
+        data_tests: [not_null]
+
+  - name: dim_agency
+    description: Current agency members keyed by normalized code, with an unknown member if needed.
+    columns:
+      - name: agency_key
+        data_tests: [not_null, unique]
+      - name: agency_code
+        data_tests: [not_null]
+
+  - name: dim_borough
+    description: Current borough members; source spelling is trimmed and uppercased.
+    columns:
+      - name: borough_key
+        data_tests: [not_null, unique]
+      - name: borough_name
+        data_tests: [not_null]
+
+  - name: dim_complaint
+    description: Complaint-type members (the dataset calls these Problems).
+    columns:
+      - name: complaint_key
+        data_tests: [not_null, unique]
+      - name: complaint_type
+        data_tests: [not_null]
+
+  - name: dim_date
+    description: Distinct created dates currently represented in the staging table.
+    columns:
+      - name: date_day
+        data_tests: [not_null, unique]
+
+  - name: fct_service_requests
+    description: >
+      One row per request in its most recently ingested state. This is not
+      an event history; resolution hours are null when source clocks conflict.
+    columns:
+      - name: service_request_id
+        data_tests: [not_null, unique]
+      - name: agency_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_agency')
+                field: agency_key
+      - name: borough_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_borough')
+                field: borough_key
+      - name: complaint_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_complaint')
+                field: complaint_key
+      - name: created_day
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_day
+      - name: created_at
+        data_tests: [not_null]
+      - name: has_closed_timestamp
+        data_tests: [not_null]
+

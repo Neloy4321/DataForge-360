@@ -1,0 +1,18 @@
+name: dataforge_360
+version: '1.0.0'
+config-version: 2
+profile: dataforge_360
+
+model-paths: ["models"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+
+models:
+  dataforge_360:
+    staging:
+      +materialized: view
+      +schema: stg
+    marts:
+      +materialized: table
+      +schema: marts
+

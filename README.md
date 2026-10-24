@@ -1,6 +1,6 @@
 # DataForge 360
 
-**Enterprise Data Engineering & Analytics Platform — Phases 1–2: ingestion and PostgreSQL staging**
+**Enterprise Data Engineering & Analytics Platform — Phases 1–3: ingestion, PostgreSQL and dbt analytics**
 
 [![Python CI](https://github.com/Neloy4321/DataForge-360/actions/workflows/ci.yml/badge.svg)](https://github.com/Neloy4321/DataForge-360/actions/workflows/ci.yml)
 
@@ -9,10 +9,14 @@ built around real public NYC 311 service-request data. The end goal is an
 end-to-end platform with ingestion, a PostgreSQL warehouse, dbt transformations,
 Prefect orchestration, quality checks, BI analysis and a web dashboard.
 
-**Status:** The bounded ingestion layer is implemented and locally tested. A
-PostgreSQL staging warehouse with replay-safe upserts has been added in Phase 2;
-its real-database integration check runs in GitHub Actions. A scheduler,
-dbt transformations and the dashboard remain planned, not completed features.
+**Status:** Bounded API ingestion, a PostgreSQL staging warehouse with replay-safe
+upserts, and SQL analytics models with dbt quality tests are implemented.
+Phase 2's PostgreSQL integration checks passed GitHub Actions. On 2026-10-24,
+the project owner also verified ingestion of 100 real NYC 311 records, a matching
+SHA-256 manifest, warehouse loading of 100 rows, and a PostgreSQL count of 100
+on Windows. Phase 3's dbt build is independently gated by its CI job; the
+owner's Windows dbt acceptance run is pending. Prefect and the dashboard are
+planned rather than completed features.
 
 ## What works today
 
@@ -26,6 +30,9 @@ dbt transformations and the dashboard remain planned, not completed features.
   the file for its date window. A rerun does not append duplicate files.
 - Produce a JSON manifest with row count, source, time window and SHA-256 digest.
 - Run a deterministic offline unit-test suite through Python's standard library.
+- Upsert a verified snapshot into PostgreSQL staging without rewriting unchanged rows.
+- Produce dbt staging views, four dimensions, and one request-grain fact table.
+- Assert source uniqueness, star-schema relationships, fact counts and valid durations.
 
 ## Quick start
 
@@ -119,18 +126,66 @@ PostgreSQL is bound to `127.0.0.1:55432` for local use; Docker data lives in a
 named volume. Do not delete the volume unless you intend to remove local data.
 See [warehouse implementation and limitations](docs/WAREHOUSE.md).
 
+## Phase 3 — dbt analytics star schema
+
+The `dbt/` project creates a clean staging view, **four dimension tables**
+(`dim_agency`, `dim_borough`, `dim_complaint`, `dim_date`) and the
+`fct_service_requests` table. Each fact row represents one current service
+request, keyed by the original text identifier. Foreign keys are deterministic
+hashes of normalized source values; missing category values map to an `UNKNOWN`
+dimension member. Resolution hours are computed only when the source closing
+timestamp is not before its creation timestamp. Source-local timestamps are
+**not** silently converted to UTC.
+
+The default development target writes its views to `analytics_stg` and tables
+to `analytics_marts`. It **does not** modify `staging.service_requests`.
+
+On Windows PowerShell, after the PostgreSQL load above, install the dbt adapter
+and set its secret from your existing uncommitted `.env` file:
+
+```powershell
+python -m pip install -r requirements-dbt.txt
+$dbPassword = ((Get-Content .env | Where-Object { $_ -match '^POSTGRES_PASSWORD=' } | Select-Object -First 1) -split '=', 2)[1]
+$env:DBT_PASSWORD = $dbPassword
+dbt debug --project-dir dbt --profiles-dir dbt
+dbt build --project-dir dbt --profiles-dir dbt --threads 2
+```
+
+No password is printed or placed on the command line. The dbt target defaults
+to localhost port 55432, username `dataforge`, and database `dataforge`.
+Run `dbt build` again after reloading a changed snapshot to refresh the marts.
+
+To check the analytics data using your existing Docker container:
+
+```powershell
+docker compose exec -T postgres psql -U dataforge -d dataforge -c "SELECT count(*) FROM analytics_marts.fct_service_requests;"
+docker compose exec -T postgres psql -U dataforge -d dataforge -c "SELECT agency_code, count(*) AS requests FROM analytics_marts.fct_service_requests f JOIN analytics_marts.dim_agency a USING (agency_key) GROUP BY agency_code ORDER BY requests DESC LIMIT 5;"
+```
+
+For the first 100-row bounded ingestion, expect 100 fact rows when the build
+passes. The dbt `build` command executes models and data tests in dependency
+order. The project checks source and dimension key uniqueness, non-null keys,
+dimension relationships, fact row count, duration consistency, and closed-date
+flag consistency. The GitHub CI dbt job additionally uses four isolated
+**synthetic** records to test ZIP code leading zeros, case normalization,
+2-hour resolution, unknown dimensions, bad source-clock handling, and a
+repeatable second build. The CI fixtures are not real research results.
+
+See [dbt model contract and limitations](docs/DBT_ANALYTICS.md).
+
 ## Architecture and provenance
 
 - [Current and planned architecture](docs/ARCHITECTURE.md)
 - [Official dataset, data dictionary, selected fields and caveats](docs/DATA_SOURCE.md)
+- [dbt dimensional model, validation and local runbook](docs/DBT_ANALYTICS.md)
 
 ## Milestones
 
 | Stage | Deliverable | Status |
 |---|---|---|
 | 1 | Bounded real API ingestion + tests + CI | Implemented; local tests and small live API check passed |
-| 2 | PostgreSQL staging, replay-safe upserts and integration tests | Implemented; server-side CI acceptance pending verification |
-| 3 | dbt transformations, star schema and data quality | Planned |
+| 2 | PostgreSQL staging, replay-safe upserts and integration tests | Implemented; GitHub PostgreSQL CI passed and user confirmed local 100-row load |
+| 3 | dbt transformations, star schema and data quality | Code and isolated CI checks added; Phase 3 CI/Windows acceptance to be verified |
 | 4 | Prefect orchestration, retries and observability | Planned |
 | 5 | Streamlit/Power BI analytics | Planned |
 | 6 | Hosting, benchmarking, end-to-end acceptance | Planned |
