@@ -11,6 +11,7 @@ import sys
 import tempfile
 from pathlib import Path
 from unittest.mock import patch
+from urllib.parse import parse_qs, urlsplit
 
 # This acceptance script is invoked directly in CI and on Windows. Python puts
 # tests/ (not the repository root) on sys.path for direct script execution.
@@ -41,7 +42,13 @@ def main() -> None:
          "closed_date": "2026-09-01T12:00:00", "agency": "DEP",
          "borough": "Queens", "complaint_type": "Water", "status": "Closed"},
     ]
-    client = NYC311Client(fetch=lambda url, headers: rows, app_token="")
+    def synthetic_page(url: str, headers: dict) -> list[dict]:
+        # Match the API's $limit contract: a cap=1 smoke check must receive
+        # one record, allowing the completeness gate itself to be exercised.
+        limit = int(parse_qs(urlsplit(url).query)["$limit"][0])
+        return rows[:limit]
+
+    client = NYC311Client(fetch=synthetic_page, app_token="")
 
     with tempfile.TemporaryDirectory() as folder:
         raw, evidence = str(Path(folder) / "raw"), str(Path(folder) / "evidence")
