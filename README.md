@@ -218,7 +218,9 @@ $env:DBT_PASSWORD = $dbPassword
 
 `--allow-truncated` is **for explicit bounded smoke tests only**. Normal and
 scheduled runs reject date windows reaching the cap because those extracts
-cannot be certified complete. For self-hosted daily scheduling, see the
+cannot be certified complete. A new `backfill` command previews and then
+replays at most 31 explicit one-day windows with the same integrity and dbt
+quality gates. For backfill instructions and opt-in daily scheduling, see the
 [Prefect runbook](docs/PREFECT_ORCHESTRATION.md). Scheduling is not activated
 merely by installing or cloning the project.
 
@@ -258,8 +260,8 @@ provided or claimed to be tested yet.
 | 1 | Bounded real API ingestion + tests + CI | Implemented; local tests and small live API check passed |
 | 2 | PostgreSQL staging, replay-safe upserts and integration tests | Implemented; GitHub PostgreSQL CI passed and user confirmed local 100-row load |
 | 3 | dbt transformations, star schema and data quality | Implemented; GitHub dbt CI and user Windows 38/38 local dbt acceptance passed |
-| 4 | Prefect orchestration, retries and observability | Isolated Prefect+PostgreSQL+dbt CI passed; Windows bounded 100-row smoke run passed; scheduler/full backfill pending |
-| 5 | Streamlit/Power BI analytics | Dashboard SQL + Streamlit UI verified in GitHub PostgreSQL/dbt CI; Windows visual validation and native Power BI `.pbix` pending |
+| 4 | Prefect orchestration, retries and observability | Isolated Prefect+PostgreSQL+dbt CI passed; user-provided Windows logs show two successful non-capped single-day source windows (20,066 rows read); historical backfill and scheduler acceptance pending |
+| 5 | Streamlit/Power BI analytics | Dashboard SQL + Streamlit UI verified in GitHub CI; user-provided Windows screenshot confirms September 2 data and working date selection; native Power BI `.pbix` pending |
 | 6 | Hosting, benchmarking, end-to-end acceptance | Planned |
 
 ## Privacy and limitations
