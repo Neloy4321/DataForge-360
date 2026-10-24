@@ -103,6 +103,8 @@ jobs:
         run: dbt build --project-dir dbt --profiles-dir dbt --threads 2
       - name: Check rerun output
         run: python tests/dbt_acceptance.py verify
+      - name: Verify read-only staging-to-mart data quality report
+        run: python tests/quality_acceptance.py
 
   prefect-integration:
     runs-on: ubuntu-latest
