@@ -116,7 +116,7 @@ password environment variables listed above and set the local API address:
 
 ```powershell
 $env:PREFECT_API_URL = 'http://127.0.0.1:4200/api'
-.\.venv\Scripts\python.exe -m dataforge.prefect_pipeline serve --cron '0 3 * * *' --lookback-days 1 --max-records-per-day 10000 --page-size 1000
+.\.venv\Scripts\python.exe -m dataforge.prefect_pipeline serve --cron '0 3 * * *' --lookback-days 1 --max-records-per-day 50000 --page-size 1000
 ```
 
 `serve` stays running and listens for scheduled flow runs; stopping that
@@ -124,6 +124,13 @@ process with Ctrl+C stops its listener. Scheduling is not a permanent Windows
 service, cloud deployment or guarantee of daily execution after a laptop
 shutdown. Configure a Windows service or hosted worker *later*, after local
 acceptance and resource profiling.
+
+The conservative daily record cap now defaults to **50,000** across manual
+Prefect runs, backfills and scheduled reconciliation. It was raised from 10,000
+because the owner's real September 2026 execution included days with
+**10,163, 10,527 and 10,842** requests. The existing completeness gate still
+rejects any partition that actually reaches its cap; 50,000 is a safety
+ceiling, **not** a throughput benchmark or source-completeness guarantee.
 
 Scheduled mode defaults to processing one previously completed UTC calendar
 date interval. This **does not** assert NYC 311 uses UTC timestamps; source
