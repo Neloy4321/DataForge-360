@@ -1,6 +1,6 @@
 # DataForge 360 architecture
 
-## Current scope: Phases 1–3 (dbt CI and Windows acceptance passed)
+## Current scope: Phases 1–4 (Prefect acceptance pending)
 
 ```mermaid
 flowchart LR
@@ -12,6 +12,9 @@ flowchart LR
     F --> G[PostgreSQL staging]
     G --> H[dbt staging view]
     H --> I[Analytics star schema]
+    J[Prefect local flow] -.-> B
+    J -.-> F
+    J -.-> H
 ```
 
 The ingestion command accepts an inclusive start date, exclusive end date, a
@@ -44,12 +47,22 @@ checks. The project owner supplied a successful Windows dbt debug and build
 log on 2026-10-24 (6 models and 32 data tests, PASS=38, WARN=0, ERROR=0)
 and confirmed 100 records in `analytics_marts.fct_service_requests`.
 
+Phase 4 introduces the optional `dataforge.prefect_pipeline` flow, with task
+retries, sequential ingestion/integrity/warehouse/dbt stages, atomic JSON run
+evidence and an explicitly enabled local daily `flow.serve()` deployment.
+Scheduled runs replay up to seven recent daily windows. They halt before the
+warehouse when the per-day record cap is reached, since completeness cannot
+be demonstrated for a capped window. CI separately exercises the actual
+Prefect flow with synthetic records, replay safety and cap rejection.
+
 ### Current limitations
 
 - This is a **bounded historical extract**, not a continuous sync.
 - `created_date` filtering cannot capture updates to arbitrarily old records.
   Operational upserts require a later refresh strategy and change reconciliation.
-- Prefect scheduling, Power BI reporting and a hosted app are not yet implemented.
+- Prefect scheduling **code** exists, but no real continuous hosted service,
+  unattended Windows task or monitoring SLA is deployed yet.
+- Power BI reporting and a hosted app are not yet implemented.
 - dbt tables currently rebuild in full after source updates; this intentionally
   prioritizes correctness for bounded data over full-scale incremental materialization.
 - The dimension tables are **current-state** views of categories; they are not
@@ -67,7 +80,7 @@ flowchart TD
     B --> C[PostgreSQL staging]
     C --> D[dbt marts — implemented]
     D --> E[Analytics dashboard]
-    F[Prefect orchestration] -.-> A
+    F[Prefect orchestration — implemented locally] -.-> A
     F -.-> C
     F -.-> D
     G[Quality checks and CI] -.-> C

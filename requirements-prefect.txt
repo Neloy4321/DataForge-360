@@ -1,0 +1,5 @@
+# Self-hosted Prefect 3, no Prefect Cloud account required.
+# 3.9.0 fixes server imports on recent FastAPI and caps incompatible FastAPI releases.
+prefect==3.9.0
+fastapi>=0.139,<0.151
+
