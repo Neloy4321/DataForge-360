@@ -1,0 +1,29 @@
+// Create these measures separately in Power BI Desktop; this file documents
+// real DAX expressions, not a serialized Power BI project or .pbix artifact.
+
+Total Requests = COUNTROWS('fct_service_requests')
+
+Closed Requests =
+    CALCULATE(
+        [Total Requests],
+        FILTER(
+            'fct_service_requests',
+            LOWER(COALESCE('fct_service_requests'[request_status], "")) = "closed"
+        )
+    )
+
+Closure Share = DIVIDE([Closed Requests], [Total Requests], 0)
+
+Open or Other Status Requests = [Total Requests] - [Closed Requests]
+
+Valid Resolution Observations =
+    COUNT('fct_service_requests'[resolution_hours])
+
+Average Resolution Hours =
+    AVERAGE('fct_service_requests'[resolution_hours])
+
+Median Resolution Hours =
+    MEDIAN('fct_service_requests'[resolution_hours])
+
+Missing or Invalid Resolution Hours =
+    [Total Requests] - [Valid Resolution Observations]

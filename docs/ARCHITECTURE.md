@@ -1,6 +1,6 @@
 # DataForge 360 architecture
 
-## Current scope: Phases 1–4 (Prefect acceptance pending)
+## Current scope: Phases 1–5 (dashboard Windows validation pending)
 
 ```mermaid
 flowchart LR
@@ -15,6 +15,9 @@ flowchart LR
     J[Prefect local flow] -.-> B
     J -.-> F
     J -.-> H
+    I --> K[Read-only aggregate SQL]
+    K --> L[Streamlit dashboard]
+    I --> M[Power BI Desktop model]
 ```
 
 The ingestion command accepts an inclusive start date, exclusive end date, a
@@ -54,6 +57,16 @@ Scheduled runs replay up to seven recent daily windows. They halt before the
 warehouse when the per-day record cap is reached, since completeness cannot
 be demonstrated for a capped window. CI separately exercises the actual
 Prefect flow with synthetic records, replay safety and cap rejection.
+The owner also completed a bounded Windows smoke run with 100 ingested rows,
+zero updates on replay and 38 dbt checks passing. Continuous scheduling is
+still an optional, unverified deployment mode.
+
+Phase 5 adds a Streamlit dashboard that executes parameterized, date-bounded
+aggregate SQL against existing dbt marts. Data processing stays in PostgreSQL;
+the application does not download the whole fact into Python. The BI contract
+includes a same-grain Power BI relationship map and DAX measure specification;
+native Power BI Desktop report creation remains a Windows task. Location
+clusters are rounded and require at least five requests per group.
 
 ### Current limitations
 
@@ -62,7 +75,8 @@ Prefect flow with synthetic records, replay safety and cap rejection.
   Operational upserts require a later refresh strategy and change reconciliation.
 - Prefect scheduling **code** exists, but no real continuous hosted service,
   unattended Windows task or monitoring SLA is deployed yet.
-- Power BI reporting and a hosted app are not yet implemented.
+- Power BI Desktop `.pbix` and publicly authenticated app hosting are not yet
+  implemented; only the Streamlit application and Power BI specification exist.
 - dbt tables currently rebuild in full after source updates; this intentionally
   prioritizes correctness for bounded data over full-scale incremental materialization.
 - The dimension tables are **current-state** views of categories; they are not
@@ -79,7 +93,7 @@ flowchart TD
     A[Source API] --> B[Raw storage]
     B --> C[PostgreSQL staging]
     C --> D[dbt marts — implemented]
-    D --> E[Analytics dashboard]
+    D --> E[Streamlit dashboard — implemented locally]
     F[Prefect orchestration — implemented locally] -.-> A
     F -.-> C
     F -.-> D

@@ -146,3 +146,51 @@ jobs:
         run: python -m pip install -r requirements-warehouse.txt -r requirements-dbt.txt -r requirements-prefect.txt
       - name: Verify real orchestrated execution, replay safety and truncation guard
         run: python tests/prefect_acceptance.py
+
+  dashboard-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16.15-alpine3.24
+        env:
+          POSTGRES_DB: dataforge_ci
+          POSTGRES_USER: dataforge_ci
+          POSTGRES_PASSWORD: local-ci-test-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U dataforge_ci -d dataforge_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATAFORGE_TEST_DATABASE_URL: postgresql://dataforge_ci:local-ci-test-only@localhost:5432/dataforge_ci
+      DBT_HOST: localhost
+      DBT_PORT: "5432"
+      DBT_USER: dataforge_ci
+      DBT_PASSWORD: local-ci-test-only
+      DBT_DBNAME: dataforge_ci
+      DBT_SCHEMA: analytics_dashboard_ci
+      DBT_ENGINE_MANAGE_STATE: "0"
+      STREAMLIT_BROWSER_GATHER_USAGE_STATS: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: |
+            requirements-warehouse.txt
+            requirements-dbt.txt
+            requirements-dashboard.txt
+      - name: Install dbt, PostgreSQL and Streamlit
+        run: python -m pip install -r requirements-warehouse.txt -r requirements-dbt.txt -r requirements-dashboard.txt
+      - name: Seed a dedicated synthetic 311 database
+        run: python tests/dbt_acceptance.py seed
+      - name: Materialize the real dbt dimensions and facts
+        run: dbt build --project-dir dbt --profiles-dir dbt --threads 2
+      - name: Verify aggregate query correctness and privacy gates
+        run: python tests/dashboard_acceptance.py
+      - name: Smoke-test the real Streamlit UI
+        run: python tests/dashboard_app_smoke.py
