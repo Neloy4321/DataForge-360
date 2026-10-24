@@ -39,9 +39,15 @@ are explicitly Phase 6 tasks.
 
 ### Interpretation and performance
 
-- On the owner's initial bounded 100-row NYC 311 smoke extract, the UI should
-  show **100** total requests when the full loaded two-day interval is selected.
-  That sample is *not* evidence of the whole city's request totals.
+- The initial 100-row September 1 smoke extract was deliberately truncated.
+  In later owner-supplied Windows execution, five source-created days
+  (September 1–5, 2026) were loaded and reconciled to **50,740** fact rows.
+  Screenshot evidence shows 50,740 requests, 47,101 Closed (92.8%) and
+  6.1-hour median valid closure time with all category filters cleared.
+  Those five dates do **not** establish complete citywide historical coverage.
+- Daily trend dates use **ordered source-local date categories**, not a continuous
+  timestamp axis. This avoids the misleading `12 PM` ticks previously seen
+  between whole-day points; each tooltip retains its ISO date.
 - `Closed requests` is based on the current `status` field being "Closed";
   it is not based solely on the existence of a closing timestamp.
 - Resolution hours are non-null only for valid source timestamps; invalid,
@@ -52,8 +58,9 @@ are explicitly Phase 6 tasks.
 - Timestamps are reported in their **source-local/unspecified time basis**.
   No unsupported UTC conversion is claimed.
 - To reduce exposed location precision, geocoordinates are rounded to 0.01°
-  and only cells with **five or more requests** appear. Tiny samples often
-  have no eligible map cells; that is normal.
+  and only cells with **five or more requests** appear. The map displays at most
+  **400** qualifying grid cells, so additional eligible cells can be omitted.
+  Tiny samples often have no eligible map cells; that is normal.
 - Initial date range defaults to the last 30 **available** created days. The
   app limits an arbitrary user-selected window to 367 calendar dates and
   caps top-category rows, map groups and cache entries. PostgreSQL statements
@@ -64,7 +71,8 @@ are explicitly Phase 6 tasks.
 ## Evidence and unfinished acceptance
 
 Automated GitHub Actions CI passed using synthetic cases, validating SQL results,
-privacy grouping and the real Streamlit app runtime (run `40118189903`).
-The owner still needs to run the dashboard on Windows,
-inspect screenshots and optionally create a native `.pbix` through Power BI
-Desktop. No native PBIX or public Streamlit deployment is asserted here.
+privacy grouping and the real Streamlit app runtime. The owner supplied Windows
+screenshots for the five-day dashboard, including the filtered Activity,
+Operations and Geographic Clusters views. BI export buttons and a native
+Power BI `.pbix` are **not yet accepted** on Windows. Public deployment,
+always-on scheduling and independent operating evidence remain pending.

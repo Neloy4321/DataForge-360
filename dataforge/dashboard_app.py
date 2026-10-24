@@ -18,8 +18,37 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 
-def main() -> None:
+def build_daily_trend_chart(rows: list[dict]):
+    """Render a source-local daily trend with exactly one date category per day.
+
+    Using a temporal axis for midnight timestamps introduced misleading 12 PM
+    tick labels between observations in the Windows five-day dashboard.
+    """
     import altair as alt
+    import pandas as pd
+
+    frame = pd.DataFrame(rows)
+    if frame.empty:
+        return None
+    frame["day_label"] = pd.to_datetime(frame["day"]).dt.strftime("%Y-%m-%d")
+    long_frame = frame.melt(
+        id_vars="day_label", value_vars=["requests", "closed_requests"],
+        var_name="metric", value_name="count",
+    )
+    return (
+        alt.Chart(long_frame).mark_line(point=True, strokeWidth=2)
+        .encode(
+            x=alt.X("day_label:O", sort="ascending", title="Created date",
+                    axis=alt.Axis(labelAngle=-35, labelOverlap="greedy")),
+            y=alt.Y("count:Q", title="Requests"),
+            color=alt.Color("metric:N", title="Series"),
+            tooltip=[alt.Tooltip("day_label:O", title="Date"), "metric:N", "count:Q"],
+        )
+        .properties(height=330)
+    )
+
+
+def main() -> None:
     import pandas as pd
     import streamlit as st
 
@@ -147,17 +176,8 @@ def main() -> None:
 
     with trend_tab:
         st.subheader("Service request trend")
-        frame = pd.DataFrame(daily)
-        if not frame.empty:
-            frame["day"] = pd.to_datetime(frame["day"])
-            long_frame = frame.melt(id_vars="day", value_vars=["requests", "closed_requests"],
-                                    var_name="metric", value_name="count")
-            chart = (alt.Chart(long_frame).mark_line(point=True, strokeWidth=2)
-                     .encode(x=alt.X("day:T", title="Created date"),
-                             y=alt.Y("count:Q", title="Requests"),
-                             color=alt.Color("metric:N", title="Series"),
-                             tooltip=["day:T", "metric:N", "count:Q"])
-                     .properties(height=330))
+        chart = build_daily_trend_chart(daily)
+        if chart is not None:
             st.altair_chart(chart, use_container_width=True)
         x, y = st.columns(2)
         with x:
@@ -199,7 +219,8 @@ def main() -> None:
             clusters = []
         if clusters:
             st.map(pd.DataFrame(clusters), latitude="lat", longitude="lon", size="requests")
-            st.caption(f"{len(clusters)} eligible geographic cells, capped at 400.")
+            st.caption(f"Displaying {len(clusters)} aggregated geographic cells (limit 400); "
+                       "additional eligible cells may be omitted.")
         else:
             st.info("This slice has no location cells meeting the 5-request privacy threshold.")
 
