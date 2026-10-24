@@ -1,6 +1,6 @@
 # DataForge 360 architecture
 
-## Current scope: Phases 1–3 (code implemented; dbt acceptance pending)
+## Current scope: Phases 1–3 (dbt CI accepted; Windows validation pending)
 
 ```mermaid
 flowchart LR
@@ -38,8 +38,9 @@ Staging normalization feeds `dim_agency`, `dim_borough`, `dim_complaint`,
 `dim_date`, and `fct_service_requests`. The latest known service-request state
 is the fact grain. Relationships, cardinality and derived-duration checks
 execute with `dbt build`; an isolated PostgreSQL CI job uses synthetic inputs
-and verifies expected values plus repeat runs. The CI run result and owner's
-local dbt run must be checked before declaring Phase 3 acceptance.
+and verifies expected values plus repeat runs. GitHub Actions run 40105551077
+passed the dbt PostgreSQL integration job, including all data and repeated-build
+checks. The owner's local Windows dbt run remains pending.
 
 ### Current limitations
 

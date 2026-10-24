@@ -14,8 +14,9 @@ upserts, and SQL analytics models with dbt quality tests are implemented.
 Phase 2's PostgreSQL integration checks passed GitHub Actions. On 2026-10-24,
 the project owner also verified ingestion of 100 real NYC 311 records, a matching
 SHA-256 manifest, warehouse loading of 100 rows, and a PostgreSQL count of 100
-on Windows. Phase 3's dbt build is independently gated by its CI job; the
-owner's Windows dbt acceptance run is pending. Prefect and the dashboard are
+on Windows. Phase 3's dbt build, data tests, exact-value integration checks and
+rebuild verification passed GitHub Actions (run 40105551077); the owner's
+Windows dbt acceptance run is pending. Prefect and the dashboard are
 planned rather than completed features.
 
 ## What works today
@@ -185,7 +186,7 @@ See [dbt model contract and limitations](docs/DBT_ANALYTICS.md).
 |---|---|---|
 | 1 | Bounded real API ingestion + tests + CI | Implemented; local tests and small live API check passed |
 | 2 | PostgreSQL staging, replay-safe upserts and integration tests | Implemented; GitHub PostgreSQL CI passed and user confirmed local 100-row load |
-| 3 | dbt transformations, star schema and data quality | Code and isolated CI checks added; Phase 3 CI/Windows acceptance to be verified |
+| 3 | dbt transformations, star schema and data quality | Implemented; GitHub isolated dbt CI passed; user Windows dbt run pending |
 | 4 | Prefect orchestration, retries and observability | Planned |
 | 5 | Streamlit/Power BI analytics | Planned |
 | 6 | Hosting, benchmarking, end-to-end acceptance | Planned |
