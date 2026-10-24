@@ -280,7 +280,7 @@ With `DATABASE_URL` set, the JSON report is written to the ignored
 | 2 | PostgreSQL staging, replay-safe upserts and integration tests | Implemented; GitHub PostgreSQL CI passed and user confirmed local 100-row load |
 | 3 | dbt transformations, star schema and data quality | Implemented; GitHub dbt CI and user Windows 38/38 local dbt acceptance passed |
 | 4 | Prefect orchestration, retries and observability | Isolated Prefect+PostgreSQL+dbt CI passed; user-provided Windows logs show five successful non-capped daily source windows (50,740 rows read), including a three-day backfill; scheduler and independent database reconciliation pending |
-| 5 | Streamlit/Power BI analytics | Dashboard SQL + Streamlit UI verified in GitHub CI; user-provided Windows screenshot confirms September 2 data and working date selection; native Power BI `.pbix` pending |
+| 5 | Streamlit/Power BI analytics | Dashboard SQL + Streamlit UI verified in GitHub CI; user-supplied Windows screenshots confirm five-day 50,740-row Activity, Operations and aggregated-map views; native Power BI `.pbix` pending |
 | 6 | Hosting, benchmarking, end-to-end acceptance | Planned |
 
 ## Privacy and limitations
