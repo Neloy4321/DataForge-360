@@ -1,0 +1,7 @@
+{
+  "name": "DataForge 360 Light",
+  "dataColors": ["#0E938A", "#5076D9", "#E5A53D", "#795EC6", "#E07B68", "#68849A", "#59AB72", "#D168A0"],
+  "background": "#F7F9FC",
+  "foreground": "#183046",
+  "tableAccent": "#0E938A"
+}

@@ -1,5 +1,18 @@
 # Power BI Desktop — reproducible report specification
 
+## Offline five-day snapshot starter (no PostgreSQL required)
+
+The four **aggregated** NYC 311 exports from 2026-09-01 through 2026-09-05
+are bundled in [`powerbi/demo_exports/`](../powerbi/demo_exports/) for a
+reproducible **offline Power BI Desktop** portfolio report. Follow the
+[build guide](../powerbi/BUILD_SNAPSHOT_REPORT.md), use the
+[separate aggregate-table DAX measures](../powerbi/snapshot_measures.dax),
+and verify totals with `python powerbi/validate_demo_exports.py` before
+publishing. **Do not relate these four pre-aggregated tables**: use the dbt
+star schema below for valid date, agency, borough and complaint cross-filters.
+This starter is not a native `.pbix`; Windows construction and visual QA remain
+pending.
+
 This is a **Power BI-ready analytical model**, not a prebuilt `.pbix` file.
 Native `.pbix` creation and Windows visual verification require Power BI Desktop.
 

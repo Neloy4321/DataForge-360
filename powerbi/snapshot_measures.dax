@@ -1,0 +1,35 @@
+// Offline CSV snapshot measures — create each separately in Power BI Desktop.
+// These tables are independent aggregates. Do not relate them to each other.
+
+Total Requests = SUM('Daily'[requests])
+
+Closed Requests = SUM('Daily'[closed_requests])
+
+Not Closed Requests = [Total Requests] - [Closed Requests]
+
+Closure Rate = DIVIDE([Closed Requests], [Total Requests])
+
+Agency Requests = SUM('Agency'[requests])
+
+Agency Closed = SUM('Agency'[closed_requests])
+
+Agency Closure Rate = DIVIDE([Agency Closed], [Agency Requests])
+
+Borough Requests = SUM('Borough'[requests])
+
+Borough Closed = SUM('Borough'[closed_requests])
+
+Borough Closure Rate = DIVIDE([Borough Closed], [Borough Requests])
+
+Top 15 Complaint Requests = SUM('Complaint'[requests])
+
+Top 15 Complaint Closed = SUM('Complaint'[closed_requests])
+
+Complaint Closure Rate = DIVIDE([Top 15 Complaint Closed], [Top 15 Complaint Requests])
+
+// Full-window coverage only. Do not present as a date-filtered measure.
+Top 15 Coverage - Full Snapshot =
+    DIVIDE(
+        CALCULATE([Top 15 Complaint Requests], REMOVEFILTERS('Complaint')),
+        CALCULATE([Total Requests], REMOVEFILTERS('Daily'))
+    )
