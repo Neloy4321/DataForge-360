@@ -88,7 +88,7 @@ GitHub Actions will independently test the code on each push and pull request.
 
 | Stage | Deliverable | Status |
 |---|---|---|
-| 1 | Bounded real API ingestion + tests + CI | Implemented locally; CI pending first push |
+| 1 | Bounded real API ingestion + tests + CI | Code and tests implemented; CI workflow included |
 | 2 | PostgreSQL staging/warehouse, deduplication and updates | Planned |
 | 3 | dbt transformations, star schema and data quality | Planned |
 | 4 | Prefect orchestration, retries and observability | Planned |
