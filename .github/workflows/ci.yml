@@ -79,6 +79,7 @@ jobs:
       DBT_PASSWORD: local-ci-test-only
       DBT_DBNAME: dataforge_ci
       DBT_SCHEMA: analytics_ci
+      DBT_ENGINE_MANAGE_STATE: "0"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -95,10 +96,10 @@ jobs:
       - name: Check dbt profile and PostgreSQL connectivity
         run: dbt debug --project-dir dbt --profiles-dir dbt
       - name: Build star schema and enforce source/mart data quality
-        run: dbt build --project-dir dbt --profiles-dir dbt --threads 2 --no-manage-state
+        run: dbt build --project-dir dbt --profiles-dir dbt --threads 2
       - name: Verify exact transformed values, dimensions and grain
         run: python tests/dbt_acceptance.py verify
       - name: Rebuild and verify deterministic model reruns
-        run: dbt build --project-dir dbt --profiles-dir dbt --threads 2 --no-manage-state
+        run: dbt build --project-dir dbt --profiles-dir dbt --threads 2
       - name: Check rerun output
         run: python tests/dbt_acceptance.py verify
