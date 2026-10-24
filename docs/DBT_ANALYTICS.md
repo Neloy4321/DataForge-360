@@ -71,6 +71,7 @@ In Windows PowerShell, within a fresh Git clone of the latest `main`:
 python -m pip install -r requirements-dbt.txt
 $dbPassword = ((Get-Content .env | Where-Object { $_ -match '^POSTGRES_PASSWORD=' } | Select-Object -First 1) -split '=', 2)[1]
 $env:DBT_PASSWORD = $dbPassword
+$env:DBT_ENGINE_MANAGE_STATE = "0"
 dbt debug --project-dir dbt --profiles-dir dbt
 dbt build --project-dir dbt --profiles-dir dbt --threads 2
 ```
@@ -80,6 +81,14 @@ by dbt and is not loaded from `.env` automatically. Other connection settings
 are optionally overridable using `DBT_HOST`, `DBT_PORT`, `DBT_USER`,
 `DBT_DBNAME` and `DBT_SCHEMA`. The custom model schemas are composed by dbt from
 the default target schema, for example `analytics_stg` and `analytics_marts`.
+
+dbt State is a separate, account-authenticated cloud optimization feature and
+is intentionally **disabled** (`flags.manage_state: false` plus environment
+`DBT_ENGINE_MANAGE_STATE=0`). It is unnecessary for locally built,
+deterministic analytics tables. If a user's dbt installation opens a sign-in
+window and waits for State authentication, cancel, set the environment variable,
+and run the documented ordinary dbt build. The `--no-manage-state` option is not
+available in dbt Core v1.12; no trial or account signup is required here.
 
 ## Future work / honest limitations
 

@@ -79,6 +79,7 @@ jobs:
       DBT_PASSWORD: local-ci-test-only
       DBT_DBNAME: dataforge_ci
       DBT_SCHEMA: analytics_ci
+      DBT_ENGINE_MANAGE_STATE: "0"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
