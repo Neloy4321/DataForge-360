@@ -3,6 +3,10 @@ version: '1.0.0'
 config-version: 2
 profile: dataforge_360
 
+# Entirely self-hosted portfolio workflow; no dbt State SaaS login/trial.
+flags:
+  manage_state: false
+
 model-paths: ["models"]
 test-paths: ["tests"]
 macro-paths: ["macros"]

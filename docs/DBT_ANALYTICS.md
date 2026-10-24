@@ -72,7 +72,7 @@ python -m pip install -r requirements-dbt.txt
 $dbPassword = ((Get-Content .env | Where-Object { $_ -match '^POSTGRES_PASSWORD=' } | Select-Object -First 1) -split '=', 2)[1]
 $env:DBT_PASSWORD = $dbPassword
 dbt debug --project-dir dbt --profiles-dir dbt
-dbt build --project-dir dbt --profiles-dir dbt --threads 2
+dbt build --project-dir dbt --profiles-dir dbt --threads 2 --no-manage-state
 ```
 
 The `.env` file is kept locally and never committed. The password is required
@@ -80,6 +80,13 @@ by dbt and is not loaded from `.env` automatically. Other connection settings
 are optionally overridable using `DBT_HOST`, `DBT_PORT`, `DBT_USER`,
 `DBT_DBNAME` and `DBT_SCHEMA`. The custom model schemas are composed by dbt from
 the default target schema, for example `analytics_stg` and `analytics_marts`.
+
+dbt State is a separate, account-authenticated cloud optimization feature and
+is intentionally **disabled** (`flags.manage_state: false` and explicit
+`--no-manage-state` on build commands). It is unnecessary for locally built,
+deterministic analytics tables. If a user's dbt installation opens a sign-in
+window and waits for State authentication, cancel and run the documented build
+with `--no-manage-state`; do not sign up for a trial to run this project.
 
 ## Future work / honest limitations
 

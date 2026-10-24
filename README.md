@@ -151,7 +151,7 @@ python -m pip install -r requirements-dbt.txt
 $dbPassword = ((Get-Content .env | Where-Object { $_ -match '^POSTGRES_PASSWORD=' } | Select-Object -First 1) -split '=', 2)[1]
 $env:DBT_PASSWORD = $dbPassword
 dbt debug --project-dir dbt --profiles-dir dbt
-dbt build --project-dir dbt --profiles-dir dbt --threads 2
+dbt build --project-dir dbt --profiles-dir dbt --threads 2 --no-manage-state
 ```
 
 No password is printed or placed on the command line. The dbt target defaults
@@ -159,6 +159,11 @@ to localhost port 55432, username `dataforge`, and database `dataforge`.
 The dbt dependency file pins supported stable `dbt-core==1.12.6` and
 `dbt-postgres==1.11.0`; older installs may have resolved to prerelease
 `dbt-core==1.13.0b1` and should reinstall from the updated requirements.
+We explicitly disable the unrelated **dbt State** cloud integration in the
+project configuration and on build commands. This project needs **no dbt
+account, dbt State trial, browser sign-in or hosted dbt platform**. If an
+existing installation prompts for State login, cancel with Ctrl+C and use
+`--no-manage-state` as above.
 Run `dbt build` again after reloading a changed snapshot to refresh the marts.
 
 To check the analytics data using your existing Docker container:
