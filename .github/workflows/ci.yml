@@ -53,3 +53,52 @@ jobs:
         run: python -m pip install -r requirements-warehouse.txt
       - name: Verify PostgreSQL insert, replay and update
         run: python -m unittest discover -s tests -p 'test_warehouse_integration.py' -v
+
+  dbt-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16.15-alpine3.24
+        env:
+          POSTGRES_DB: dataforge_ci
+          POSTGRES_USER: dataforge_ci
+          POSTGRES_PASSWORD: local-ci-test-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U dataforge_ci -d dataforge_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATAFORGE_TEST_DATABASE_URL: postgresql://dataforge_ci:local-ci-test-only@localhost:5432/dataforge_ci
+      DBT_HOST: localhost
+      DBT_PORT: "5432"
+      DBT_USER: dataforge_ci
+      DBT_PASSWORD: local-ci-test-only
+      DBT_DBNAME: dataforge_ci
+      DBT_SCHEMA: analytics_ci
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: |
+            requirements-warehouse.txt
+            requirements-dbt.txt
+      - name: Install dbt and PostgreSQL adapters
+        run: python -m pip install -r requirements-warehouse.txt -r requirements-dbt.txt
+      - name: Seed isolated synthetic NYC311-style records
+        run: python tests/dbt_acceptance.py seed
+      - name: Check dbt profile and PostgreSQL connectivity
+        run: dbt debug --project-dir dbt --profiles-dir dbt
+      - name: Build star schema and enforce source/mart data quality
+        run: dbt build --project-dir dbt --profiles-dir dbt --threads 2
+      - name: Verify exact transformed values, dimensions and grain
+        run: python tests/dbt_acceptance.py verify
+      - name: Rebuild and verify deterministic model reruns
+        run: dbt build --project-dir dbt --profiles-dir dbt --threads 2
+      - name: Check rerun output
+        run: python tests/dbt_acceptance.py verify

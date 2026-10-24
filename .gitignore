@@ -14,3 +14,7 @@ logs/
 .DS_Store
 .idea/
 .vscode/
+dbt/target/
+dbt/logs/
+dbt/dbt_packages/
+dbt/.user.yml

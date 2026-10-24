@@ -1,0 +1,2 @@
+# dbt Core v1 adapter for PostgreSQL, pinned to a reviewed major/minor release.
+dbt-postgres==1.11.0
