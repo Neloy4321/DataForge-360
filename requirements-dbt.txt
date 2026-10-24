@@ -1,2 +1,3 @@
-# dbt Core v1 adapter for PostgreSQL, pinned to a reviewed major/minor release.
+# Stable, tested dbt Core/adapter pair. Avoid prerelease dbt-core candidates.
+dbt-core==1.12.6
 dbt-postgres==1.11.0
