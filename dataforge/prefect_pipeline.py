@@ -24,7 +24,7 @@ except ImportError as exc:
     ) from exc
 
 from .orchestration_core import (
-    ROOT, build_analytics, historical_daily_windows, new_report, previous_complete_days,
+    ROOT, DEFAULT_DAILY_RECORD_CAP, build_analytics, historical_daily_windows, new_report, previous_complete_days,
     require_complete_snapshot, require_database_environment, utc_now,
     validate_window, write_evidence,
 )
@@ -53,7 +53,7 @@ def dbt_task() -> dict:
 
 
 @flow(name="dataforge-360-partition", log_prints=False)
-def run_partition_flow(start: str, end: str, *, max_records: int = 10000,
+def run_partition_flow(start: str, end: str, *, max_records: int = DEFAULT_DAILY_RECORD_CAP,
                        page_size: int = 1000, allow_truncated: bool = False,
                        output_dir: str = "data/raw",
                        report_dir: str = "data/runs") -> dict:
@@ -120,7 +120,7 @@ def refresh_recent_flow() -> list[dict]:
     Default: one yesterday partition, conservative completeness checks on.
     """
     days = int(os.getenv("DATAFORGE_LOOKBACK_DAYS", "1"))
-    max_records = int(os.getenv("DATAFORGE_MAX_RECORDS_PER_DAY", "10000"))
+    max_records = int(os.getenv("DATAFORGE_MAX_RECORDS_PER_DAY", str(DEFAULT_DAILY_RECORD_CAP)))
     page_size = int(os.getenv("DATAFORGE_PAGE_SIZE", "1000"))
     windows = previous_complete_days(lookback_days=days)
     results = []
@@ -138,7 +138,7 @@ def main(argv: list[str] | None = None) -> int:
     single = commands.add_parser("run", help="One explicit bounded date window")
     single.add_argument("--start", required=True, help="Inclusive YYYY-MM-DD")
     single.add_argument("--end", required=True, help="Exclusive YYYY-MM-DD")
-    single.add_argument("--max-records", type=int, default=10000)
+    single.add_argument("--max-records", type=int, default=DEFAULT_DAILY_RECORD_CAP)
     single.add_argument("--page-size", type=int, default=1000)
     single.add_argument("--allow-truncated", action="store_true",
                         help="Explicit smoke-only option; forbids completeness claims")
@@ -147,14 +147,14 @@ def main(argv: list[str] | None = None) -> int:
     )
     backfill.add_argument("--start", required=True, help="Inclusive YYYY-MM-DD")
     backfill.add_argument("--end", required=True, help="Exclusive YYYY-MM-DD")
-    backfill.add_argument("--max-records-per-day", type=int, default=50000)
+    backfill.add_argument("--max-records-per-day", type=int, default=DEFAULT_DAILY_RECORD_CAP)
     backfill.add_argument("--page-size", type=int, default=1000)
     backfill.add_argument("--dry-run", action="store_true",
                           help="Print planned daily windows without touching API or database")
     deployment = commands.add_parser("serve", help="Serve a local daily schedule")
     deployment.add_argument("--cron", default="0 3 * * *")
     deployment.add_argument("--lookback-days", type=int, default=1)
-    deployment.add_argument("--max-records-per-day", type=int, default=10000)
+    deployment.add_argument("--max-records-per-day", type=int, default=DEFAULT_DAILY_RECORD_CAP)
     deployment.add_argument("--page-size", type=int, default=1000)
     args = parser.parse_args(argv)
     try:
