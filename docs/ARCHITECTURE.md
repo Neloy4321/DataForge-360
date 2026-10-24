@@ -1,6 +1,6 @@
 # DataForge 360 architecture
 
-## Current scope: Phases 1–3 (dbt CI accepted; Windows validation pending)
+## Current scope: Phases 1–3 (dbt CI and Windows acceptance passed)
 
 ```mermaid
 flowchart LR
@@ -40,7 +40,9 @@ is the fact grain. Relationships, cardinality and derived-duration checks
 execute with `dbt build`; an isolated PostgreSQL CI job uses synthetic inputs
 and verifies expected values plus repeat runs. GitHub Actions run 40105551077
 passed the dbt PostgreSQL integration job, including all data and repeated-build
-checks. The owner's local Windows dbt run remains pending.
+checks. The project owner supplied a successful Windows dbt debug and build
+log on 2026-10-24 (6 models and 32 data tests, PASS=38, WARN=0, ERROR=0)
+and confirmed 100 records in `analytics_marts.fct_service_requests`.
 
 ### Current limitations
 

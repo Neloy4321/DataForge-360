@@ -15,9 +15,11 @@ Phase 2's PostgreSQL integration checks passed GitHub Actions. On 2026-10-24,
 the project owner also verified ingestion of 100 real NYC 311 records, a matching
 SHA-256 manifest, warehouse loading of 100 rows, and a PostgreSQL count of 100
 on Windows. Phase 3's dbt build, data tests, exact-value integration checks and
-rebuild verification passed GitHub Actions (run 40105551077); the owner's
-Windows dbt acceptance run is pending. Prefect and the dashboard are
-planned rather than completed features.
+rebuild verification passed GitHub Actions (run 40105753201). The project owner
+independently ran `dbt debug` successfully on Windows and completed the real-data
+dbt build with **38/38 PASS (6 models, 32 tests, 0 warnings/errors)**, including
+`analytics_marts.fct_service_requests` with **100 rows** on 2026-10-24.
+Prefect and the dashboard are planned rather than completed features.
 
 ## What works today
 
@@ -154,6 +156,9 @@ dbt build --project-dir dbt --profiles-dir dbt --threads 2
 
 No password is printed or placed on the command line. The dbt target defaults
 to localhost port 55432, username `dataforge`, and database `dataforge`.
+The dbt dependency file pins supported stable `dbt-core==1.12.6` and
+`dbt-postgres==1.11.0`; older installs may have resolved to prerelease
+`dbt-core==1.13.0b1` and should reinstall from the updated requirements.
 Run `dbt build` again after reloading a changed snapshot to refresh the marts.
 
 To check the analytics data using your existing Docker container:
@@ -186,7 +191,7 @@ See [dbt model contract and limitations](docs/DBT_ANALYTICS.md).
 |---|---|---|
 | 1 | Bounded real API ingestion + tests + CI | Implemented; local tests and small live API check passed |
 | 2 | PostgreSQL staging, replay-safe upserts and integration tests | Implemented; GitHub PostgreSQL CI passed and user confirmed local 100-row load |
-| 3 | dbt transformations, star schema and data quality | Implemented; GitHub isolated dbt CI passed; user Windows dbt run pending |
+| 3 | dbt transformations, star schema and data quality | Implemented; GitHub dbt CI and user Windows 38/38 local dbt acceptance passed |
 | 4 | Prefect orchestration, retries and observability | Planned |
 | 5 | Streamlit/Power BI analytics | Planned |
 | 6 | Hosting, benchmarking, end-to-end acceptance | Planned |

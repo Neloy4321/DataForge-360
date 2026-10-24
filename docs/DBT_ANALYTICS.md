@@ -46,6 +46,23 @@ The dedicated CI script refuses to seed or query any database other than
 `dataforge_ci`. The CI data are artificial and are **not** included in the user's
 real NYC 311 analytical figures.
 
+## Verified Windows smoke acceptance — 2026-10-24
+
+The project owner supplied PowerShell output from Windows 11, Python 3.11.9
+and the existing PostgreSQL Docker container:
+
+- dbt adapter `1.11.0`; `dbt debug`: profiles/project files valid and connection OK.
+- First local `dbt build`: 6 models plus 32 data tests, `PASS=38`, `WARN=0`,
+  `ERROR=0`, `SKIP=0`.
+- `analytics_marts.fct_service_requests`: 100 records matching the 100-row
+  bounded snapshot loaded into operational staging.
+- This is a local functional acceptance, not an independent full-data benchmark
+  or a signed production deployment claim.
+
+The originally installed resolver selected prerelease `dbt-core 1.13.0b1`,
+even with the stable Postgres adapter pinned. The project now also pins
+`dbt-core==1.12.6` to prevent accidental beta upgrades in future installations.
+
 ## Local run
 
 In Windows PowerShell, within a fresh Git clone of the latest `main`:
