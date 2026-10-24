@@ -19,6 +19,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 MAX_SCHEDULE_LOOKBACK = 7
 MAX_HISTORICAL_BACKFILL_DAYS = 31
+DEFAULT_DAILY_RECORD_CAP = 50_000  # Typical NYC311 days exceed 10,000 requests.
 
 
 class IncompleteWindowError(RuntimeError):
