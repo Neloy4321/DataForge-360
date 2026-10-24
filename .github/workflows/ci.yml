@@ -144,6 +144,8 @@ jobs:
             requirements-prefect.txt
       - name: Install Prefect, dbt and PostgreSQL adapters
         run: python -m pip install -r requirements-warehouse.txt -r requirements-dbt.txt -r requirements-prefect.txt
+      - name: Verify bounded historical backfill CLI dry-run without DB credentials
+        run: python tests/backfill_cli_acceptance.py
       - name: Verify real orchestrated execution, replay safety and truncation guard
         run: python tests/prefect_acceptance.py
 
