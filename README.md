@@ -218,7 +218,9 @@ $env:DBT_PASSWORD = $dbPassword
 
 `--allow-truncated` is **for explicit bounded smoke tests only**. Normal and
 scheduled runs reject date windows reaching the cap because those extracts
-cannot be certified complete. A new `backfill` command previews and then
+cannot be certified complete. Prefect's daily record cap now defaults to
+**50,000**, based on observed real days exceeding 10,000; hitting the cap
+still fails closed. A new `backfill` command previews and then
 replays at most 31 explicit one-day windows with the same integrity and dbt
 quality gates. For backfill instructions and opt-in daily scheduling, see the
 [Prefect runbook](docs/PREFECT_ORCHESTRATION.md). Scheduling is not activated

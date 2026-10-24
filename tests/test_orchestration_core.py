@@ -10,7 +10,8 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from dataforge.orchestration_core import (
-    IncompleteWindowError, build_analytics, historical_daily_windows, new_report,
+    DEFAULT_DAILY_RECORD_CAP, IncompleteWindowError, build_analytics,
+    historical_daily_windows, new_report,
     previous_complete_days,
     require_complete_snapshot, require_database_environment, validate_window,
     write_evidence,
@@ -28,6 +29,11 @@ class OrchestrationCoreTests(unittest.TestCase):
     def test_unbounded_reconciliation_is_rejected(self):
         with self.assertRaises(ValueError):
             previous_complete_days(lookback_days=8)
+
+    def test_default_daily_cap_covers_observed_real_partition_peak(self):
+        # Owner-provided Sept 2026 logs included a 10,842-row day.
+        self.assertGreater(DEFAULT_DAILY_RECORD_CAP, 10842)
+        self.assertLessEqual(DEFAULT_DAILY_RECORD_CAP, 1_000_000)
 
     def test_window_and_caps_are_validated(self):
         with self.assertRaises(ValueError):
