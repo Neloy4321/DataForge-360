@@ -53,6 +53,54 @@ models and report on unchanged versus updated rows. Expect the first Prefect
 run to take longer than the existing standalone commands because the local
 Prefect orchestration engine initializes its state database.
 
+## Historical backfill extension — bounded daily replay
+
+The `backfill` subcommand adds an explicit historical date range while reusing
+**exactly the same daily** ingestion, SHA-256 integrity verification,
+non-truncation gate, transaction-safe warehouse upsert, dbt build and local
+run evidence as `run`. It plans one-day source-local date windows,
+oldest first. End dates remain **exclusive**. Up to **31 daily partitions**
+are allowed per command; split longer periods into smaller batches.
+
+First preview the dates without connecting to NYC Open Data or PostgreSQL:
+
+```powershell
+.\.venv\Scripts\python.exe -m dataforge.prefect_pipeline backfill --start 2026-09-03 --end 2026-09-10 --max-records-per-day 50000 --page-size 1000 --dry-run
+```
+
+After reviewing the plan, and with the usual private `DATABASE_URL` and
+`DBT_PASSWORD` variables set, remove `--dry-run` to execute. On an 8 GB RAM
+Windows laptop, begin with **two or three days** and monitor disk usage,
+API retries, dbt time and Prefect memory before extending the range. This
+runs dbt per partition, intentionally favoring straightforward per-day quality
+acceptance over maximum throughput.
+
+The historical CLI **never permits** `--allow-truncated`: if one partition
+hits the record cap, that day fails before warehouse loading and later days
+are not processed. Increase the per-day cap or rerun a shorter explicit
+window once the problem is investigated. Successful earlier partitions retain
+individual `data/runs/` evidence; rerunning the same date range uses
+idempotent warehouse upserts. This is **not** an automatic checkpoint/resume
+or guaranteed exactly-once API ingestion. Existing source records may change
+when NYC updates its daily dataset.
+
+### User-run Windows acceptance (reported 2026-10-25)
+
+The repository owner supplied the following **local execution logs**:
+
+- 2026-09-02 (inclusive) to 2026-09-03 (exclusive): **10,163** records loaded,
+  **38 dbt PASS**, status **succeeded**.
+- 2026-09-01 (inclusive) to 2026-09-02 (exclusive): **9,903** records read;
+  **9,803** new/changed after a prior 100-row sample, **38 dbt PASS**,
+  status **succeeded**.
+- These two partitions imply **20,066** distinct staging records if no
+  additional manual writes occurred. This count has not been independently
+  queried by the agent. Prefect reports are local, not cryptographically signed.
+
+The Streamlit dashboard screenshot also confirms September 2 can be selected
+and displays 10,163 requests and a 91.7% closure share. It does not prove a
+multi-week backfill or an always-on scheduled service.
+
 ## Opt-in local daily scheduling (not started by default)
 
 Only after successful manual validation: start a local Prefect server in a

@@ -1,6 +1,7 @@
 """Prefect 3 local-first orchestration for DataForge 360.
 
 Manual:   python -m dataforge.prefect_pipeline run --start ... --end ...
+Backfill: python -m dataforge.prefect_pipeline backfill --start ... --end ...
 Schedule: python -m dataforge.prefect_pipeline serve --cron "0 3 * * *"
 
 Prefect credentials, dbt passwords and database DSNs are never task parameters.
@@ -23,7 +24,7 @@ except ImportError as exc:
     ) from exc
 
 from .orchestration_core import (
-    ROOT, build_analytics, new_report, previous_complete_days,
+    ROOT, build_analytics, historical_daily_windows, new_report, previous_complete_days,
     require_complete_snapshot, require_database_environment, utc_now,
     validate_window, write_evidence,
 )
@@ -141,6 +142,15 @@ def main(argv: list[str] | None = None) -> int:
     single.add_argument("--page-size", type=int, default=1000)
     single.add_argument("--allow-truncated", action="store_true",
                         help="Explicit smoke-only option; forbids completeness claims")
+    backfill = commands.add_parser(
+        "backfill", help="Safely replay an explicit 1..31 day historical range"
+    )
+    backfill.add_argument("--start", required=True, help="Inclusive YYYY-MM-DD")
+    backfill.add_argument("--end", required=True, help="Exclusive YYYY-MM-DD")
+    backfill.add_argument("--max-records-per-day", type=int, default=50000)
+    backfill.add_argument("--page-size", type=int, default=1000)
+    backfill.add_argument("--dry-run", action="store_true",
+                          help="Print planned daily windows without touching API or database")
     deployment = commands.add_parser("serve", help="Serve a local daily schedule")
     deployment.add_argument("--cron", default="0 3 * * *")
     deployment.add_argument("--lookback-days", type=int, default=1)
@@ -148,8 +158,8 @@ def main(argv: list[str] | None = None) -> int:
     deployment.add_argument("--page-size", type=int, default=1000)
     args = parser.parse_args(argv)
     try:
-        require_database_environment()
         if args.action == "run":
+            require_database_environment()
             output = run_partition_flow(args.start, args.end,
                                         max_records=args.max_records,
                                         page_size=args.page_size,
@@ -157,7 +167,47 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps({"status": output["status"], "run_id": output["run_id"],
                               "rows_read": output["warehouse"]["rows_read"],
                               "dbt_pass": output["dbt"]["passed"]}, indent=2))
+        elif args.action == "backfill":
+            windows = historical_daily_windows(date.fromisoformat(args.start),
+                                               date.fromisoformat(args.end))
+            validate_window(windows[0][0], windows[0][1],
+                            args.max_records_per_day, args.page_size)
+            if args.dry_run:
+                print(json.dumps({
+                    "status": "planned",
+                    "start_inclusive": args.start,
+                    "end_exclusive": args.end,
+                    "daily_partitions": len(windows),
+                    "max_records_per_day": args.max_records_per_day,
+                    "page_size": args.page_size,
+                    "days": [start.isoformat() for start, _ in windows],
+                }, indent=2))
+                return 0
+            require_database_environment()
+            completed = []
+            for start_day, end_day in windows:
+                result = run_partition_flow(
+                    start_day.isoformat(), end_day.isoformat(),
+                    max_records=args.max_records_per_day,
+                    page_size=args.page_size,
+                    allow_truncated=False,
+                )
+                completed.append({
+                    "day": start_day.isoformat(),
+                    "run_id": result["run_id"],
+                    "rows_read": result["warehouse"]["rows_read"],
+                    "rows_inserted_or_updated": result["warehouse"]["rows_inserted_or_updated"],
+                    "rows_unchanged": result["warehouse"]["rows_unchanged"],
+                    "dbt_pass": result["dbt"]["passed"],
+                })
+            print(json.dumps({
+                "status": "succeeded",
+                "completed_partitions": len(completed),
+                "rows_read": sum(item["rows_read"] for item in completed),
+                "runs": completed,
+            }, indent=2))
         else:
+            require_database_environment()
             previous_complete_days(lookback_days=args.lookback_days)
             validate_window(date(2026, 9, 1), date(2026, 9, 2),
                             args.max_records_per_day, args.page_size)

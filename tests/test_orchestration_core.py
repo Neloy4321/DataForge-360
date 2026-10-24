@@ -10,7 +10,8 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from dataforge.orchestration_core import (
-    IncompleteWindowError, build_analytics, new_report, previous_complete_days,
+    IncompleteWindowError, build_analytics, historical_daily_windows, new_report,
+    previous_complete_days,
     require_complete_snapshot, require_database_environment, validate_window,
     write_evidence,
 )
@@ -35,6 +36,23 @@ class OrchestrationCoreTests(unittest.TestCase):
             validate_window(date(2026, 9, 1), date(2026, 9, 2), 0, 50)
         with self.assertRaises(ValueError):
             validate_window(date(2026, 9, 1), date(2026, 9, 2), 100, 0)
+
+    def test_historical_backfill_is_daily_oldest_first_and_exclusive_end(self):
+        self.assertEqual(historical_daily_windows(date(2026, 9, 1), date(2026, 9, 3)), [
+            (date(2026, 9, 1), date(2026, 9, 2)),
+            (date(2026, 9, 2), date(2026, 9, 3)),
+        ])
+
+    def test_historical_backfill_refuses_empty_reversed_or_long_ranges(self):
+        for start, end in [
+            (date(2026, 9, 1), date(2026, 9, 1)),
+            (date(2026, 9, 2), date(2026, 9, 1)),
+            (date(2026, 9, 1), date(2026, 10, 3)),
+        ]:
+            with self.subTest(start=start, end=end), self.assertRaises(ValueError):
+                historical_daily_windows(start, end)
+        self.assertEqual(len(historical_daily_windows(date(2026, 9, 1),
+                                                     date(2026, 10, 2))), 31)
 
     def test_cap_guard_prevents_silent_truncation(self):
         capped = {"dataset_id": "erm2-nwe9", "reached_max_records": True}
