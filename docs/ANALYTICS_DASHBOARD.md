@@ -68,11 +68,22 @@ are explicitly Phase 6 tasks.
 - Large backfills need suitable warehouse indexes/partitioning, profiling,
   source completeness checks and controlled hosting *before* claiming scale.
 
-## Evidence and unfinished acceptance
+## Evidence and local acceptance
 
 Automated GitHub Actions CI passed using synthetic cases, validating SQL results,
 privacy grouping and the real Streamlit app runtime. The owner supplied Windows
 screenshots for the five-day dashboard, including the filtered Activity,
-Operations and Geographic Clusters views. BI export buttons and a native
-Power BI `.pbix` are **not yet accepted** on Windows. Public deployment,
-always-on scheduling and independent operating evidence remain pending.
+Operations and Geographic Clusters views. These are accepted for the tested
+local dashboard scope; automated validation of every BI download control is
+not separately claimed.
+
+The native Power BI `.pbix` and editable `.pbip` were committed to `main`
+in `4f783f6`. Owner-supplied Windows evidence supports all five page visuals,
+Queens borough-selection behavior, and the four CSV source loads during
+Refresh; the owner reported that Refresh finished without an error.
+See [local release acceptance](LOCAL_RELEASE_ACCEPTANCE_2026-10-25.md).
+
+**Only future milestone:** hosting, benchmarking and comprehensive end-to-end
+acceptance, deferred by the owner. This includes public authentication,
+unattended scheduling reliability and independent full-pipeline evidence.
+No production-hosting claim is made.
