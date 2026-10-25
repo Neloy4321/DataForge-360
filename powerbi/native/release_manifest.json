@@ -38,5 +38,28 @@
       "closed": 30323
     }
   },
-  "status_note": "Static artifact validation only; Power BI Desktop rendering and refreshed data connections not executed in this environment."
+  "status_note": "Static PBIX/CSV validation passed; owner-supplied Windows screenshots support five-page rendering and Queens filter behavior; four CSV loads visible during Refresh, with owner reporting no error after completion. No independent automated Windows execution or hosted end-to-end validation.",
+  "desktop_evidence": {
+    "date": "2026-10-25",
+    "scope": "owner-supplied Windows screenshots and attestation",
+    "pages_reviewed": 5,
+    "borough_selection": {
+      "category": "Queens",
+      "requests": 12493,
+      "closed": 11349,
+      "closure_rate_pct": 90.84
+    },
+    "refresh": {
+      "tables_shown_loading": [
+        "daily",
+        "agency",
+        "borough",
+        "complaint"
+      ],
+      "completion": "owner reports no error",
+      "independent_completion_log": false
+    },
+    "local_acceptance": "passed (owner-evidenced bounded scope)",
+    "hosted_end_to_end_acceptance": "deferred"
+  }
 }
