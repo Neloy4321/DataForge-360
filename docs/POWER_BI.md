@@ -10,11 +10,15 @@ reproducible **offline Power BI Desktop** portfolio report. Follow the
 and verify totals with `python powerbi/validate_demo_exports.py` before
 publishing. **Do not relate these four pre-aggregated tables**: use the dbt
 star schema below for valid date, agency, borough and complaint cross-filters.
-This starter is not a native `.pbix`; Windows construction and visual QA remain
-pending.
+The CSV starter and DAX specification below remain useful for reconstruction.
+The project owner separately saved and provided a **five-page native `.pbix`**
+from Windows Power BI Desktop (2026-10-25). It passed static artifact inspection,
+though the actual Windows renderer and refresh were not independently run here.
+The binary is **not yet committed** to this repository; see the
+[native Power BI release handoff](POWER_BI_NATIVE_REPORT.md).
 
-This is a **Power BI-ready analytical model**, not a prebuilt `.pbix` file.
-Native `.pbix` creation and Windows visual verification require Power BI Desktop.
+The owner-supplied PBIX uses independent, pre-aggregated CSV tables. It is
+**not** the request-grain dbt star schema specified in the sections below.
 
 ## Connect to the same local warehouse
 
