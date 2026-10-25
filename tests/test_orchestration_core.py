@@ -42,6 +42,10 @@ class OrchestrationCoreTests(unittest.TestCase):
             validate_window(date(2026, 9, 1), date(2026, 9, 2), 0, 50)
         with self.assertRaises(ValueError):
             validate_window(date(2026, 9, 1), date(2026, 9, 2), 100, 0)
+        # Keep Prefect preflight in lock-step with the source client.
+        validate_window(date(2026, 9, 1), date(2026, 9, 2), 100, 5000)
+        with self.assertRaises(ValueError):
+            validate_window(date(2026, 9, 1), date(2026, 9, 2), 100, 5001)
 
     def test_historical_backfill_is_daily_oldest_first_and_exclusive_end(self):
         self.assertEqual(historical_daily_windows(date(2026, 9, 1), date(2026, 9, 3)), [

@@ -16,6 +16,8 @@ import uuid
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
+from .source import MAX_PAGE_SIZE
+
 ROOT = Path(__file__).resolve().parent.parent
 MAX_SCHEDULE_LOOKBACK = 7
 MAX_HISTORICAL_BACKFILL_DAYS = 31
@@ -35,8 +37,8 @@ def validate_window(start: date, end: date, max_records: int, page_size: int) ->
         raise ValueError("Window must be a nonempty [start, end) date range")
     if not 1 <= max_records <= 1_000_000:
         raise ValueError("max_records must be in 1..1000000")
-    if not 1 <= page_size <= 50000:
-        raise ValueError("page_size must be in 1..50000")
+    if not 1 <= page_size <= MAX_PAGE_SIZE:
+        raise ValueError(f"page_size must be in 1..{MAX_PAGE_SIZE}")
 
 
 def previous_complete_days(*, lookback_days: int, today: date | None = None):

@@ -38,3 +38,16 @@ These future checks are **not failures of the bounded local release**, but also 
 - [Power BI Desktop evidence and caveats](POWER_BI_NATIVE_REPORT.md)
 - [Native release manifest](../powerbi/native/release_manifest.json)
 - [Portfolio case study](DATAFORGE_PORTFOLIO_CASE_STUDY.md)
+
+## Subsequent reproducibility audit
+
+A P0 review identified the initial Git commit omitted the PBIP report's visual
+JSON definitions and registered assets although the working PBIX contained
+them. The editable report source was subsequently populated with all 86 visual
+files and six registered assets from the **final** PBIX. An offline verifier
+now checks PBIX↔PBIP **report-definition** semantic parity and resource bytes,
+with negative unit tests and GitHub CI. This restores static report-source
+completeness, but does **not** supersede the prior local acceptance scope:
+Windows Desktop opening of the reconstructed `.pbip`, TMDL model equivalence,
+warehouse-fed Power BI and end-to-end production operation have not been
+independently accepted. Hosting remains deferred at the owner's request.

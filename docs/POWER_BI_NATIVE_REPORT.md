@@ -95,3 +95,24 @@ owner-confirmed CSV refresh outcome. The evidence is described in the
 **Only subsequent milestone:** hosting, benchmarking and full end-to-end
 acceptance (deferred by project owner). This local acceptance is **not** a
 production-readiness or externally operated deployment certification.
+
+## P0 source-completeness audit and repair
+
+The initial Git integration accidentally omitted `visuals/*/visual.json` and
+`StaticResources/RegisteredResources/` from the editable PBIP tree, despite
+those files existing within the validated Windows-saved PBIX. This was a
+source-control completeness failure, not a failure of the saved PBIX.
+
+The 86 visual definitions, five cinematic PNG assets, custom theme JSON and
+full report metadata have now been restored **from the final PBIX** to
+`powerbi/native/source/DataForge360_PowerBI/project.Report/`.
+The extended `powerbi/validate_native_release.py` performs a fail-closed
+static comparison of all PBIX report-definition files and registered resource
+bytes to the checked-in PBIP report folder; synthetic missing/tampered-file
+tests guard against regression. GitHub CI invokes the validator.
+
+**Limitation:** this verifies PBIR report JSON/asset parity, not the Power BI
+Desktop application opening the PBIP or producing an equivalent semantic model.
+The existing owner evidence proves the **PBIX** opened and rendered. A PBIP
+roundtrip / TMDL model equivalence should not be marked verified before an
+actual Windows Desktop test. See [Microsoft PBIR documentation](https://learn.microsoft.com/en-us/power-bi/developer/projects/projects-report).

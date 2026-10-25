@@ -1,6 +1,6 @@
 # DataForge 360 architecture
 
-## Current scope: Phases 1–5 (dashboard Windows validation pending)
+## Current scope: Phases 1–5 — locally demonstrated; hosting deferred
 
 ```mermaid
 flowchart LR
@@ -17,7 +17,7 @@ flowchart LR
     J -.-> H
     I --> K[Read-only aggregate SQL]
     K --> L[Streamlit dashboard]
-    I --> M[Power BI Desktop model]
+    N[Four separate historical aggregate CSV exports] --> M[Native Power BI V5.1 showcase]
 ```
 
 The ingestion command accepts an inclusive start date, exclusive end date, a
@@ -62,11 +62,15 @@ zero updates on replay and 38 dbt checks passing. Continuous scheduling is
 still an optional, unverified deployment mode.
 
 Phase 5 adds a Streamlit dashboard that executes parameterized, date-bounded
-aggregate SQL against existing dbt marts. Data processing stays in PostgreSQL;
-the application does not download the whole fact into Python. The BI contract
-includes a same-grain Power BI relationship map and DAX measure specification;
-native Power BI Desktop report creation remains a Windows task. Location
-clusters are rounded and require at least five requests per group.
+aggregate SQL against dbt marts; processing remains in PostgreSQL. A **separate**
+Windows-saved native Power BI V5.1 report displays four historical, pre-aggregated
+CSV inputs for September 1–5, 2026, **not** a live feed from the dbt star schema.
+Five Desktop pages, Queens within-page selection and CSV refresh loading are
+documented from owner-supplied screenshots. The final PBIX is in Git; its 86
+PBIR visual files and registered background/theme assets have since been
+restored to the editable PBIP source and checked for static report-definition
+parity against that PBIX. Independently reopening the reconstructed PBIP in
+Windows Desktop and checking semantic-model equivalence remain **unverified**.
 The isolated GitHub PostgreSQL/dbt/dashboard integration test passed, including
 real Streamlit runtime execution over four synthetic warehouse records.
 
@@ -77,8 +81,14 @@ real Streamlit runtime execution over four synthetic warehouse records.
   Operational upserts require a later refresh strategy and change reconciliation.
 - Prefect scheduling **code** exists, but no real continuous hosted service,
   unattended Windows task or monitoring SLA is deployed yet.
-- Power BI Desktop `.pbix` and publicly authenticated app hosting are not yet
-  implemented; only the Streamlit application and Power BI specification exist.
+- Power BI `.pbix` **is committed**, and the PBIP report JSON/assets now match its
+  embedded report definition statically. The TMDL semantic model's functional
+  Desktop reopen is not independently proven.
+- The native PBIX uses four independent aggregate CSVs, so it is **not**
+  integrated end-to-end with the PostgreSQL/dbt mart. Valid cross-table
+  request-grain filtering requires a separate warehouse-connected BI model.
+- Public hosting, load benchmarks and full unattended operational acceptance
+  are deferred by the project owner.
 - dbt tables currently rebuild in full after source updates; this intentionally
   prioritizes correctness for bounded data over full-scale incremental materialization.
 - The dimension tables are **current-state** views of categories; they are not
@@ -105,3 +115,14 @@ flowchart TD
 
 Phases will be implemented and demonstrated individually. A pipeline passing
 its unit tests is not proof of hosted production readiness.
+
+## Acceptance boundary (2026-10-25)
+
+Phases 1–5 have **bounded local/CI evidence**, not production certification.
+See [local acceptance](LOCAL_RELEASE_ACCEPTANCE_2026-10-25.md) and
+[Power BI native source verification](POWER_BI_NATIVE_REPORT.md). A static
+PBIX↔PBIP report definition match does not establish a tested Windows PBIP
+round-trip, embedded DataModel/TMDL equivalence or live warehouse-connected BI.
+Deferred full end-to-end acceptance would also need late-status synchronization,
+API completeness checks, unattended orchestration, repeatable scale benchmarks
+and deployment monitoring; hosting is deliberately not started now.

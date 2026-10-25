@@ -266,6 +266,12 @@ pages, a Queens category-selection interaction, and CSV refresh loading;
 the owner reported no refresh error. This is **owner-evidenced local visual
 acceptance**, not an automated independent Desktop execution by CI.
 
+The enhanced PBIR source has also been repaired: all **86 visual definitions**
+and registered image/theme assets from the final saved PBIX are now
+version-controlled in the editable `.pbip` source, with a fail-closed static
+PBIX↔PBIP report-definition parity check in CI. An actual Windows **PBIP reopen**
+and semantic-model roundtrip has not yet been independently verified.
+
 The four report CSVs are separate aggregates, **not** the PostgreSQL/dbt
 request-grain star schema. The demonstrated within-page borough interaction
 does not establish valid cross-filtering across all aggregate tables.

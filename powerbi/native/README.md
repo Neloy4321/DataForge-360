@@ -57,3 +57,19 @@ or an independently witnessed hosted data refresh.
 
 See [local release acceptance](../../docs/LOCAL_RELEASE_ACCEPTANCE_2026-10-25.md).
 Hosting, benchmarking, and comprehensive end-to-end acceptance are deferred.
+
+## Enhanced PBIR source integrity (P0 audit repair)
+
+The native report's **86 visual JSON definitions**, page JSON files and six
+RegisteredResources (five PNG backgrounds and the custom JSON theme) are
+version-controlled under `source/DataForge360_PowerBI/project.Report/`.
+The report definitions and resource bytes were restored from the final
+owner-saved PBIX, rather than relying on an older pre-save draft. Run
+`python powerbi/validate_native_release.py` at the repository root: the
+validator fails when a visual or resource is missing or does not match the
+saved PBIX. This checks **static report-definition/asset parity** only.
+
+**Still not independently tested:** opening the source `project.pbip` on
+Windows and reproducing the full report and semantic model. Microsoft states
+that official PBIX ↔ PBIP conversion/roundtrip requires Power BI Desktop.
+Do not equate static JSON parity with a passed Windows PBIP reconstruction.

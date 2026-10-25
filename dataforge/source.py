@@ -25,6 +25,7 @@ FIELDS = (
     "latitude", "longitude",
 )
 TRANSIENT_HTTP_CODES = {408, 429, 500, 502, 503, 504}
+MAX_PAGE_SIZE = 5_000  # Socrata fetch cap used by both API client and Prefect preflight.
 Fetch = Callable[[str, Mapping[str, str]], list[dict[str, Any]]]
 
 
@@ -58,7 +59,7 @@ def quote_soql(value: str) -> str:
 def build_url(start: date, end: date, limit: int, cursor: tuple[str, str] | None) -> str:
     if end <= start:
         raise ValueError("End date must be after start date")
-    if not 1 <= limit <= 5000:
+    if not 1 <= limit <= MAX_PAGE_SIZE:
         raise ValueError("Page size must be between 1 and 5000")
     start_ts = start.isoformat() + "T00:00:00"
     end_ts = end.isoformat() + "T00:00:00"
@@ -128,7 +129,7 @@ class NYC311Client:
     ) -> Iterator[dict[str, Any]]:
         if max_records < 1:
             raise ValueError("max_records must be at least 1")
-        if not 1 <= page_size <= 5000:
+        if not 1 <= page_size <= MAX_PAGE_SIZE:
             raise ValueError("page_size must be between 1 and 5000")
         headers = {"Accept": "application/json", "User-Agent": "DataForge-360/0.1"}
         if self.app_token:
