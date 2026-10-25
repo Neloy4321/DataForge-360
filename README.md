@@ -275,6 +275,7 @@ Before public release, review embedded data and machine-specific source paths.
 - [Native PBIX verification and release instructions](docs/POWER_BI_NATIVE_REPORT.md)
 - [Portfolio case study](docs/DATAFORGE_PORTFOLIO_CASE_STUDY.md)
 - [Local release acceptance — accepted scope and deferred deployment](docs/LOCAL_RELEASE_ACCEPTANCE_2026-10-25.md)
+- [Seven original Windows Desktop evidence screenshots and SHA-256 manifest](docs/evidence/powerbi-v5.1/)
 
 ## Post-backfill data quality report
 
