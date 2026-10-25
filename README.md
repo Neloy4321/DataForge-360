@@ -25,13 +25,15 @@ evidence and an opt-in daily local schedule. Five CI jobs passed on its final
 merged commit; the owner then verified the real Windows 100-row Prefect smoke
 run (**38 dbt passes, zero changed rows on replay, succeeded**) on 2026-10-24.
 This is bounded smoke validation, not full-window or scheduler acceptance.
-Phase 5 introduces a read-only Streamlit analytics dashboard and a reproducible
-Power BI Desktop specification. Synthetic PostgreSQL+dbt metrics and the actual
-Streamlit app both passed isolated GitHub Actions CI; The project owner has now saved and supplied a five-page cinematic native
-Power BI `.pbix` on Windows (2026-10-25); the supplied binary passed static
-archive/definition checks, but independent GUI rendering and a full refresh
-have not been executed here. The **binary is not yet committed** to GitHub;
-see [native Power BI handoff](docs/POWER_BI_NATIVE_REPORT.md).
+Phase 5 provides a read-only Streamlit analytics dashboard and a native five-page
+Power BI Desktop release. Synthetic PostgreSQL/dbt metrics and Streamlit app
+checks passed GitHub Actions CI. The Windows-saved cinematic Power BI `.pbix`
+and editable `.pbip` source were committed to `main` in `4f783f6`
+(2026-10-25). The owner supplied five-page Desktop screenshots, a Queens
+cross-filter screenshot, and evidence of the four CSV sources loading during
+Refresh, reporting no subsequent refresh error. Those artifacts support
+**local, screenshot-based acceptance**, not an independently automated Windows
+GUI test. See [local acceptance](docs/LOCAL_RELEASE_ACCEPTANCE_2026-10-25.md).
 
 ## What works today
 
@@ -246,9 +248,10 @@ $env:DATABASE_URL = 'postgresql://dataforge:' + [System.Uri]::EscapeDataString($
 
 Open `http://127.0.0.1:8501`. No public port, DB password or API key should
 be exposed. See the [dashboard runbook](docs/ANALYTICS_DASHBOARD.md) and
-[Power BI Desktop model and DAX](docs/POWER_BI.md). A separate Windows-saved native `.pbix` has been provided by the owner and
-inspected structurally; it remains to be installed into this Git repository
-through the local binary release handoff. See [native report notes](docs/POWER_BI_NATIVE_REPORT.md).
+[Power BI Desktop model and DAX](docs/POWER_BI.md). The Windows-saved native `.pbix`, its editable `.pbip` source and four
+reproducible aggregate CSVs are now versioned under [`powerbi/native/`](powerbi/native/).
+See [native report notes](docs/POWER_BI_NATIVE_REPORT.md) and
+[local acceptance decision](docs/LOCAL_RELEASE_ACCEPTANCE_2026-10-25.md).
 
 ## Native Power BI Desktop delivery (2026-10-25)
 
@@ -257,18 +260,21 @@ pages** (Executive, Agency, Borough, Complaint, Quality) and a historical
 September 1–5, 2026 aggregate snapshot (**50,740** requests; **47,101**
 marked Closed; Top-15 complaints **30,763** requests). The PBIX container,
 embedded report definitions and included CSV aggregate totals passed static
-checks. The owner reported successful Windows opening, page navigation and
-save; an independent Windows Desktop test/refresh was **not run here**.
+checks. The binary and editable source are committed in `4f783f6`.
+Owner-supplied Windows screenshots support acceptance of all five rendered
+pages, a Queens category-selection interaction, and CSV refresh loading;
+the owner reported no refresh error. This is **owner-evidenced local visual
+acceptance**, not an automated independent Desktop execution by CI.
 
 The four report CSVs are separate aggregates, **not** the PostgreSQL/dbt
-request-grain star schema; no valid cross-filtering across the aggregate
-tables is implied. This is a non-live portfolio snapshot, not an official
-NYC dashboard or an SLA. The binary PBIX is part of the owner's local
-release handoff and **not yet committed to the repository**; avoid making
-a public-download claim until that Git step is completed.
+request-grain star schema. The demonstrated within-page borough interaction
+does not establish valid cross-filtering across all aggregate tables.
+This is a non-live portfolio snapshot, not an official NYC dashboard or an SLA.
+Before public release, review embedded data and machine-specific source paths.
 
 - [Native PBIX verification and release instructions](docs/POWER_BI_NATIVE_REPORT.md)
 - [Portfolio case study](docs/DATAFORGE_PORTFOLIO_CASE_STUDY.md)
+- [Local release acceptance — accepted scope and deferred deployment](docs/LOCAL_RELEASE_ACCEPTANCE_2026-10-25.md)
 
 ## Post-backfill data quality report
 
@@ -303,9 +309,9 @@ With `DATABASE_URL` set, the JSON report is written to the ignored
 | 1 | Bounded real API ingestion + tests + CI | Implemented; local tests and small live API check passed |
 | 2 | PostgreSQL staging, replay-safe upserts and integration tests | Implemented; GitHub PostgreSQL CI passed and user confirmed local 100-row load |
 | 3 | dbt transformations, star schema and data quality | Implemented; GitHub dbt CI and user Windows 38/38 local dbt acceptance passed |
-| 4 | Prefect orchestration, retries and observability | Isolated Prefect+PostgreSQL+dbt CI passed; user-provided Windows logs show five successful non-capped daily source windows (50,740 rows read), including a three-day backfill; scheduler and independent database reconciliation pending |
-| 5 | Streamlit/Power BI analytics | Dashboard SQL + Streamlit UI verified in GitHub CI; user-supplied Windows screenshots confirm five-day 50,740-row Activity, Operations and aggregated-map views; owner saved native Power BI `.pbix` on Windows; binary Git commit and independent Desktop visual test pending |
-| 6 | Hosting, benchmarking, end-to-end acceptance | Planned |
+| 4 | Prefect orchestration, retries and observability | **Accepted for tested local scope:** isolated CI and owner-provided Windows Prefect evidence cover five non-capped daily windows (50,740 rows, including three-day backfill). Unattended scheduler SLA and full independent reconciliation belong to deferred end-to-end acceptance. |
+| 5 | Streamlit/Power BI analytics | **Locally accepted:** SQL and Streamlit CI checks; owner-supplied Windows Streamlit views; native `.pbix` and `.pbip` in Git `main` (`4f783f6`); five Power BI pages reviewed from screenshots; Queens interaction demonstrated; four CSV tables seen loading during Refresh, with owner reporting no error. [Acceptance scope](docs/LOCAL_RELEASE_ACCEPTANCE_2026-10-25.md). |
+| 6 | Hosting, benchmarking, full end-to-end acceptance | **Deferred by owner** — no hosting now; no production or full-pipeline certification claimed. |
 
 ## Privacy and limitations
 
