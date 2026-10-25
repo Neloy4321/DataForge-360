@@ -41,15 +41,30 @@ and four CSV input tables are included in the release handoff.
 - **Validated here:** PBIX ZIP CRC, machine-readable JSON, five page definitions,
   embedded semantic model presence, five background assets, 86 visuals, and four
   source CSV aggregate reconciliations. SHA-256: `f7e42a731065facc6595c2daecf64bdac7f7b9f87b01ddf3eeef541bee05c286`.
-- **Owner reported:** Windows Power BI Desktop opens five pages, data shown, and
-  saved the final `.pbix`; dark-frame page transition was acceptable.
-- **Not independently executed here:** Power BI Desktop GUI render, a real-time
-  source refresh, PBIX DataModel semantic equivalence to every CSV row, a full
-  PostgreSQL end-to-end refresh, production/service monitoring, or scheduler SLA.
+- **Committed to GitHub:** final binary and editable `.pbip` source in `main`,
+  initial release commit `4f783f6` (2026-10-25).
+- **Reviewed from owner-supplied Windows Desktop screenshots:** all five pages
+  displayed coherently, with expected KPI values and no obvious missing chart
+  or major overflow. A clean second Borough Analytics capture removed visible
+  chart toolbar controls.
+- **Interaction demonstrated:** selecting **Queens** in Borough Analytics
+  highlighted the corresponding bars and changed visible KPIs to **12,493**
+  requests, **11,349** marked closed, and **90.84%** status-based close-out.
+  This is page-level cross-filtering, not cross-table aggregate filtering.
+- **Refresh observed / owner-confirmed:** the Windows Refresh dialog visibly
+  loaded **daily, agency, borough and complaint** CSV sources; the screenshot
+  captures the operation in progress, and the owner then reported **no error**.
+  A separate automated, timestamped completion log was not provided.
+- **Not performed in this environment:** automated Power BI Desktop rendering
+  or CSV-refresh execution on Windows, live-source refresh, PBIX DataModel
+  semantic equivalence to every CSV row, or full PostgreSQL end-to-end testing.
+  Production/service monitoring, scheduler SLA and full benchmark acceptance
+  are deliberately deferred. Local visual validation is accepted only to the
+  level supported by owner screenshots and reports.
 
 ## Reproducible and safe workflow
 
-1. Install the matching release payload in the repository under `powerbi/native/`.
+1. Use the versioned release already committed under `powerbi/native/`.
 2. Open its `DataForge360_Cinematic_v5.1.pbix` in Power BI Desktop.
 3. If refreshing from CSV, run `powerbi/native/source/DataForge360_PowerBI/SET_DATA_PATHS.ps1`
    in its directory and open `project.pbip`. Then Refresh.
@@ -69,3 +84,14 @@ cross-filtering and production-grade incremental refresh.
 
 See [Power BI model guide](POWER_BI.md), [snapshot build guide](../powerbi/BUILD_SNAPSHOT_REPORT.md),
 and [pipeline architecture](ARCHITECTURE.md).
+
+## Local release acceptance
+
+**Accepted for bounded local/portfolio use on 2026-10-25**, combining static
+PBIX checks, owner-supplied five-page and filter-interaction captures, and the
+owner-confirmed CSV refresh outcome. The evidence is described in the
+[local release acceptance record](LOCAL_RELEASE_ACCEPTANCE_2026-10-25.md).
+
+**Only subsequent milestone:** hosting, benchmarking and full end-to-end
+acceptance (deferred by project owner). This local acceptance is **not** a
+production-readiness or externally operated deployment certification.
