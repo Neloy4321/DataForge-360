@@ -24,6 +24,11 @@ jobs:
         run: python -m compileall -q dataforge tests
       - name: Run deterministic tests (offline)
         run: python -m unittest discover -s tests -v
+      - name: Reconcile offline Power BI aggregate exports
+        run: python powerbi/validate_demo_exports.py
+      - name: Validate native Power BI binary when included in the repository
+        if: ${{ hashFiles('powerbi/native/DataForge360_Cinematic_v5.1.pbix') != '' }}
+        run: python powerbi/validate_native_release.py
 
   postgres-integration:
     runs-on: ubuntu-latest
