@@ -1,0 +1,49 @@
+{
+  "snapshot": "2026-09-01 to 2026-09-05",
+  "evidence_date": "2026-10-25",
+  "owner_screenshots": [
+    {
+      "filename": "01_executive_overview.png",
+      "description": "Executive Overview \u2014 full snapshot",
+      "sha256": "c2fc643e8e4079073540b22dd9ed47a772c76bdd0457df1e8b6a4cf85ae0ca5a",
+      "bytes": 238605
+    },
+    {
+      "filename": "02_agency_performance.png",
+      "description": "Agency Performance \u2014 full snapshot",
+      "sha256": "7e6d5cbfd4d7e05438b0014b9f6cef7f3856465b7e9c7acee6687c0e2187c5e5",
+      "bytes": 233465
+    },
+    {
+      "filename": "03_borough_analytics_clean.png",
+      "description": "Borough Analytics \u2014 clean, unselected baseline",
+      "sha256": "0859b60618abe5adc2c854e326fa4ed3e243504ea32643b99de210bb6c2a4d8c",
+      "bytes": 224426
+    },
+    {
+      "filename": "04_complaint_intelligence.png",
+      "description": "Complaint Intelligence \u2014 top 15 category scope",
+      "sha256": "c1c7304bce0be9972a4b67f5bef0b1ed20f845b27e4c51a9a3f150e31997e992",
+      "bytes": 246963
+    },
+    {
+      "filename": "05_data_quality_method.png",
+      "description": "Data Quality & Method \u2014 source and aggregation caveats",
+      "sha256": "b7b1cb14d3a224109e15aa566670d6880c077fbceaef5d124d7d83f05ad5311e",
+      "bytes": 266270
+    },
+    {
+      "filename": "06_queens_selection.png",
+      "description": "Borough Analytics \u2014 Queens selected, KPIs/visual highlighting updated",
+      "sha256": "81fb3573ec7fd01ce5d82311ed2fb2170e2abf41ea8693d4d6356d1bb0dcf650",
+      "bytes": 222841
+    },
+    {
+      "filename": "07_refresh_dialog_in_progress.png",
+      "description": "Desktop refresh dialog \u2014 four CSV sources visibly loading (not completion proof)",
+      "sha256": "f03f33073b6ef267b30bf8538d6ef049089f577c1b850f429eb1525365b06c2e",
+      "bytes": 226668
+    }
+  ],
+  "limits": "Screenshots plus owner refresh attestation; hosted load/benchmark/E2E deferred"
+}
