@@ -82,7 +82,7 @@ cross-filtering across agency, borough, complaint and daily aggregates would
 not be statistically valid. Rebuild the report on request-grain marts for true
 cross-filtering and production-grade incremental refresh.
 
-See [Power BI model guide](POWER_BI.md), [snapshot build guide](../powerbi/BUILD_SNAPSHOT_REPORT.md),
+See [seven original Desktop screenshots and checksum manifest](evidence/powerbi-v5.1/), [Power BI model guide](POWER_BI.md), [snapshot build guide](../powerbi/BUILD_SNAPSHOT_REPORT.md),
 and [pipeline architecture](ARCHITECTURE.md).
 
 ## Local release acceptance
