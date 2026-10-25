@@ -1,9 +1,9 @@
-"""Validate the owner-supplied native Power BI report and aggregate CSVs.
+"""Fail-closed static validation of Power BI PBIX, PBIP report source and CSVs.
 
-Standard-library only; performs static artifact checks, NOT GUI rendering,
-DB model equivalence, source completeness, or live-refresh acceptance.
+Checks full report-definition/asset parity against the owner-saved PBIX.
+Does NOT execute Windows Power BI Desktop, establish TMDL/DataModel equivalence,
+perform real PostgreSQL refresh, or certify production deployment.
 """
-
 from __future__ import annotations
 
 import argparse
@@ -13,13 +13,9 @@ import json
 from pathlib import Path
 import zipfile
 
-
 EXPECTED_PAGE_NAMES = (
-    "Executive Overview",
-    "Agency Performance",
-    "Borough Analytics",
-    "Complaint Intelligence",
-    "Data Quality & Method",
+    "Executive Overview", "Agency Performance", "Borough Analytics",
+    "Complaint Intelligence", "Data Quality & Method",
 )
 EXPECTED_COUNTS = {
     "daily": (5, 50_740, 47_101),
@@ -29,6 +25,8 @@ EXPECTED_COUNTS = {
 }
 DATE_SPAN = "2026-09-01_2026-09-05"
 DEFAULT_ROOT = Path(__file__).resolve().parent / "native"
+DEFAULT_PROJECT = DEFAULT_ROOT / "source" / "DataForge360_PowerBI"
+PBIX_REPORT_PREFIXES = ("Report/definition/", "Report/StaticResources/")
 
 
 def _verify_aggregate_csvs(data_dir: Path) -> dict[str, dict[str, int]]:
@@ -42,15 +40,72 @@ def _verify_aggregate_csvs(data_dir: Path) -> dict[str, dict[str, int]]:
         ]
         if not rows or list(rows[0].keys()) != fields:
             raise ValueError(f"Invalid CSV schema: {path}")
-        result = (len(rows), sum(int(r["requests"]) for r in rows),
-                  sum(int(r["closed_requests"]) for r in rows))
+        result = (len(rows), sum(int(row["requests"]) for row in rows),
+                  sum(int(row["closed_requests"]) for row in rows))
         if result != expected:
             raise ValueError(f"Wrong aggregate totals for {kind}: {result} != {expected}")
         stats[kind] = dict(zip(("rows", "requests", "closed"), result))
     return stats
 
 
-def validate(report: Path, manifest: Path, data_dir: Path) -> dict:
+def verify_pbip_report_parity(archive: zipfile.ZipFile, project_dir: Path) -> dict:
+    """Require an equivalent file for every saved-PBIX report definition and resource.
+
+    This is a *static* report-definition comparison only. Power BI Desktop is
+    required to confirm a PBIP opens and its semantic model is operational.
+    """
+    report_dir = project_dir / "project.Report"
+    if not (project_dir / "project.pbip").is_file():
+        raise ValueError("Editable PBIP entrypoint is missing")
+    pbir = report_dir / "definition.pbir"
+    if not pbir.is_file():
+        raise ValueError("PBIR report entrypoint is missing")
+    settings = json.loads(pbir.read_text(encoding="utf-8-sig"))
+    if float(settings.get("version", 0)) < 4.0:
+        raise ValueError("PBIR report format version must support enhanced definitions")
+    if not (project_dir / "project.SemanticModel" / "definition.pbism").is_file():
+        raise ValueError("PBIP semantic model entrypoint is missing")
+
+    listed = {p for p in archive.namelist() if p.startswith(PBIX_REPORT_PREFIXES)
+              and not p.endswith("/")}
+    if not listed:
+        raise ValueError("PBIX is missing report definition files")
+    for name in sorted(listed):
+        relative = name.removeprefix("Report/")
+        dest = report_dir / relative
+        if not dest.is_file():
+            raise ValueError(f"Editable PBIP report source missing: {relative}")
+        stored = archive.read(name)
+        current = dest.read_bytes()
+        if name.endswith(".json"):
+            try:
+                equal = json.loads(stored) == json.loads(current)
+            except (UnicodeDecodeError, ValueError) as exc:
+                raise ValueError(f"Unparseable PBIP source JSON: {relative}") from exc
+        else:
+            equal = stored == current
+        if not equal:
+            raise ValueError(f"PBIP source differs from saved PBIX: {relative}")
+
+    expected_visuals = {n.removeprefix("Report/") for n in listed
+                        if n.endswith("/visual.json")}
+    actual_visuals = {p.relative_to(report_dir).as_posix()
+                      for p in report_dir.rglob("visual.json")}
+    if actual_visuals != expected_visuals:
+        raise ValueError("PBIP visual file set does not match PBIX")
+    registered = [n for n in listed if "/RegisteredResources/" in n]
+    # Every resource declared by the PBIX must be checked above, including theme.
+    return {
+        "status": "passed",
+        "source_report_files": len(listed),
+        "source_visuals": len(expected_visuals),
+        "registered_resource_files": len(registered),
+        "scope": "PBIX report JSON semantics / resource byte parity only; Windows reopen and TMDL model equivalence not checked",
+    }
+
+
+def validate(report: Path, manifest: Path, data_dir: Path,
+             project_dir: Path = DEFAULT_PROJECT) -> dict:
     expected = json.loads(manifest.read_text(encoding="utf-8"))
     actual_hash = hashlib.sha256(report.read_bytes()).hexdigest()
     if actual_hash != expected["pbix_sha256"]:
@@ -66,7 +121,7 @@ def validate(report: Path, manifest: Path, data_dir: Path) -> dict:
             raise ValueError("PBIX embedded semantic model missing")
         page_order = json.loads(archive.read("Report/definition/pages/pages.json"))["pageOrder"]
         visual_total = 0
-        page_names = []
+        page_names: list[str] = []
         for page_id in page_order:
             base = f"Report/definition/pages/{page_id}/"
             page = json.loads(archive.read(base + "page.json"))
@@ -85,6 +140,7 @@ def validate(report: Path, manifest: Path, data_dir: Path) -> dict:
             and n.endswith(".png")]
         if len(backgrounds) != expected["cinematic_background_assets"]:
             raise ValueError("Wrong number of cinematic assets")
+        pbip = verify_pbip_report_parity(archive, project_dir)
     stats = _verify_aggregate_csvs(data_dir)
     return {
         "status": "passed",
@@ -92,7 +148,8 @@ def validate(report: Path, manifest: Path, data_dir: Path) -> dict:
         "pages": page_names,
         "visuals": visual_total,
         "sources": stats,
-        "limits": "Static artifacts only; no Windows Power BI rendering or live source verification",
+        "editable_pbip_report_parity": pbip,
+        "limits": "Static artifact parity only; independent Windows PBIP reopen / semantic model reconstruction and live data validation not executed",
     }
 
 
@@ -103,12 +160,15 @@ def main() -> int:
     parser.add_argument("--manifest", type=Path,
                         default=DEFAULT_ROOT / "release_manifest.json")
     parser.add_argument("--csv-dir", type=Path,
-                        default=DEFAULT_ROOT / "source" / "DataForge360_PowerBI" / "data")
+                        default=DEFAULT_PROJECT / "data")
+    parser.add_argument("--project-dir", type=Path, default=DEFAULT_PROJECT)
     args = parser.parse_args()
     try:
-        print(json.dumps(validate(args.report, args.manifest, args.csv_dir), indent=2))
+        print(json.dumps(validate(args.report, args.manifest, args.csv_dir,
+                                  args.project_dir), indent=2))
         return 0
-    except (ValueError, KeyError, OSError, json.JSONDecodeError, zipfile.BadZipFile) as exc:
+    except (ValueError, TypeError, KeyError, OSError, json.JSONDecodeError,
+            zipfile.BadZipFile) as exc:
         print(json.dumps({"status": "failed", "error": str(exc)}))
         return 1
 

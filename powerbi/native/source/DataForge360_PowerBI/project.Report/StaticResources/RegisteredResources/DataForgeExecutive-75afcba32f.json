@@ -1,0 +1,19 @@
+{
+  "name": "DataForgeExecutive-75afcba32f.json",
+  "dataColors": [
+    "#12D7CE",
+    "#819BFF",
+    "#F4AD68",
+    "#20C8EF",
+    "#5F85D7",
+    "#6ADCCB"
+  ],
+  "foreground": "#F3F9FF",
+  "foregroundNeutralSecondary": "#B5CBDF",
+  "background": "#061525",
+  "backgroundNeutral": "#0B263A",
+  "tableAccent": "#12D7CE",
+  "good": "#12D7CE",
+  "neutral": "#F4AD68",
+  "bad": "#E57F85"
+}
