@@ -11,11 +11,16 @@ and verify totals with `python powerbi/validate_demo_exports.py` before
 publishing. **Do not relate these four pre-aggregated tables**: use the dbt
 star schema below for valid date, agency, borough and complaint cross-filters.
 The CSV starter and DAX specification below remain useful for reconstruction.
-The project owner separately saved and provided a **five-page native `.pbix`**
-from Windows Power BI Desktop (2026-10-25). It passed static artifact inspection,
-though the actual Windows renderer and refresh were not independently run here.
-The binary is **not yet committed** to this repository; see the
-[native Power BI release handoff](POWER_BI_NATIVE_REPORT.md).
+The project owner saved and provided a **five-page native `.pbix`**
+from Windows Power BI Desktop (2026-10-25), now committed to `main` at
+[`powerbi/native/`](../powerbi/native/). Static artifact checks passed.
+Owner-supplied Desktop screenshots show all five report pages, a Queens
+selection that updates the Borough Analytics KPIs and highlights the relevant
+bars, and the four CSV tables loading during Refresh; the owner reported that
+Refresh completed without error. This is **screenshot-based local acceptance**,
+not execution of Windows Desktop by GitHub CI. See
+[native report verification](POWER_BI_NATIVE_REPORT.md) and
+[local acceptance decision](LOCAL_RELEASE_ACCEPTANCE_2026-10-25.md).
 
 The owner-supplied PBIX uses independent, pre-aggregated CSV tables. It is
 **not** the request-grain dbt star schema specified in the sections below.
