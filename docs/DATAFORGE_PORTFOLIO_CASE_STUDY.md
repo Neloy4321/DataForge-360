@@ -41,9 +41,14 @@ must not be confused with re-execution during this PBIX handoff.
 
 The native Power BI artifact has five report pages, 86 native visuals,
 five decorative backgrounds, and an included editable `.pbip` source.
-Artifact structure and aggregate reconciliation were inspected in the
-release package. The owner reported successful Windows Power BI usage and
-saving of the final `.pbix`; independent automated visual rendering is pending.
+Artifact structure and aggregate reconciliation passed static verification.
+The Windows-saved `.pbix` and editable `.pbip` are committed to `main`.
+The owner supplied evidence of all five Desktop report pages, a Queens
+borough filter interaction and four CSV imports during Refresh; the owner
+reported no refresh error. Desktop verification is therefore accepted for
+the documented local, screenshot-based scope; automated independent Windows
+rendering or end-to-end live refresh has not been performed. See
+[local release acceptance](LOCAL_RELEASE_ACCEPTANCE_2026-10-25.md).
 
 ## Honest limitations and future work
 
