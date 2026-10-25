@@ -41,3 +41,19 @@ A Top-15 complaint total covers only 30,763 of the 50,740 requests.
 Before changing the GitHub repo from private to public, review the embedded data,
 all source paths, screenshots and license/provenance. This is an independent portfolio
 visualization, not a NYC-endorsed service or a citywide comprehensive audit.
+
+## Local Desktop verification (2026-10-25)
+
+The owner supplied Windows Desktop screenshots of all five report pages,
+including a clean Borough Analytics page and a Queens category-selection
+example. The Queens selection changes the page KPIs to 12,493 requests,
+11,349 marked closed and 90.84%, and highlights the related bars.
+A screenshot of the Refresh dialog shows the four CSV tables being read;
+the owner reported no error after the refresh ended.
+
+**Result:** PASS for bounded, owner-evidenced **local visual, page-interaction
+and CSV-refresh acceptance**. It is **not** a CI-executed Windows GUI test
+or an independently witnessed hosted data refresh.
+
+See [local release acceptance](../../docs/LOCAL_RELEASE_ACCEPTANCE_2026-10-25.md).
+Hosting, benchmarking, and comprehensive end-to-end acceptance are deferred.
