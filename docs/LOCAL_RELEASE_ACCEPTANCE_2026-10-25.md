@@ -20,7 +20,7 @@ This is a **bounded local engineering and reporting acceptance**, not a producti
 
 ## Screenshot review details
 
-The Desktop evidence was provided in the owner's 2026-10-25 project review conversation. It includes five primary page captures, one clean Borough Analytics replacement, one Queens selection capture, and one refresh-in-progress dialog capture. The screenshot files have not been automatically committed from the conversation to GitHub. This document records their reviewed scope; their original bytes should only be treated as repository artifacts if independently added under an evidence folder.
+The Desktop evidence was provided in the owner's 2026-10-25 project review conversation. It includes five primary page captures, one clean Borough Analytics replacement, one Queens selection capture, and one refresh-in-progress dialog capture. All seven original PNG screenshot files are now **committed to GitHub** under [Power BI V5.1 evidence](evidence/powerbi-v5.1/), together with a screenshot SHA-256 manifest and evidence README. Commit `8742148c` introduced these files; GitHub-reported image blob hashes and sizes were checked against the original local bytes. The refresh screenshot is still only an in-progress image, and the reported error-free completion remains the owner's statement.
 
 The CSVs are **four independent pre-aggregated reporting tables**, **not** the request-grain PostgreSQL/dbt star schema. Page-specific borough interactions are demonstrated; valid cross-table filtering across all four aggregates is **not** asserted. The five-day snapshot is **September 1–5, 2026**, created-date cohorts, not live NYC 311 data. Status marked closed may have changed after creation; 92.83% is not an SLA.
 
