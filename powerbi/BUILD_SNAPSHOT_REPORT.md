@@ -56,11 +56,19 @@ This detects structural CSV/reconciliation errors, but cannot certify API/source
 
 ## 4. Native report handoff
 
-In Power BI Desktop, **File → Save as** `DataForge-360-NYC311-Snapshot.pbix`. Visually check all pages and verify the values above before including the `.pbix` in GitHub. The project owner has now saved a five-page native `.pbix` on Windows and provided
-it for artifact review; static PBIX integrity and report-definition checks passed,
-but independent GUI rendering and refresh were not executed here. The binary has
-**not yet been committed** to GitHub. See the
-[native cinematic report handoff](../docs/POWER_BI_NATIVE_REPORT.md). An imported `.pbix` embeds data: review its contents and remove paths/credentials/sensitive material before public distribution.
+The project owner has already saved and committed a cinematic five-page native
+`.pbix` to [`powerbi/native/`](native/) (initial commit `4f783f6`);
+the matching editable `.pbip` and four aggregate CSVs are also committed.
+Static integrity/reconciliation checks passed. Owner-supplied Windows Desktop
+screenshots show five report pages and a working Queens borough-selection
+interaction; the Refresh dialog showed all four CSV sources loading and
+the owner reported no error at completion. See the
+[native report verification](../docs/POWER_BI_NATIVE_REPORT.md) and
+[local release acceptance](../docs/LOCAL_RELEASE_ACCEPTANCE_2026-10-25.md).
+These screenshots do not constitute an independent automated Desktop run.
+An imported `.pbix` embeds data: review its contents and remove
+machine-specific paths, credentials and sensitive material before public
+distribution.
 
 Useful portfolio screenshots: Overview, Agency, Borough, Top-15 Complaint and Quality/Method pages. Label this an independent NYC Open Data project, not a government-affiliated product.
 
