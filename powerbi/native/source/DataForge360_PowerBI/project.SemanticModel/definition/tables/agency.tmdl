@@ -1,0 +1,75 @@
+table agency
+	lineageTag: cd434760-e433-4dc3-b4e1-c014f3f090c7
+
+	measure 'Agency Requests' = SUM('agency'[requests])
+		formatString: #,0
+		lineageTag: 09c4e756-a935-4185-8347-c5033ea30607
+
+	measure 'Agency Closed' = SUM('agency'[closed_requests])
+		formatString: #,0
+		lineageTag: cb725004-da2b-46c7-8560-af65b698bf6b
+
+	measure 'Agency Open' = [Agency Requests] - [Agency Closed]
+		formatString: #,0
+		lineageTag: 9067619c-e552-4a55-a13f-b47f86960503
+
+	measure 'Agency Closure Rate' = DIVIDE([Agency Closed], [Agency Requests], 0)
+		formatString: 0.00%
+		lineageTag: 9a7adc58-f16f-404b-b67c-03d1ba559183
+
+	measure 'Agency Median Hours' = MAX('agency'[median_resolution_hours])
+		formatString: 0.0
+		lineageTag: 3afa4a18-61db-4251-abbc-a53e7f4effc5
+
+	column label
+		dataType: string
+		lineageTag: f2da77e3-42d9-4f1b-8abd-e726495a1320
+		summarizeBy: none
+		sourceColumn: label
+
+		annotation SummarizationSetBy = Automatic
+
+	column requests
+		dataType: int64
+		formatString: #,0
+		lineageTag: 0b52cb06-20ca-4816-b705-7a6f491c0f3a
+		summarizeBy: sum
+		sourceColumn: requests
+
+		annotation SummarizationSetBy = Automatic
+
+	column closed_requests
+		dataType: int64
+		formatString: #,0
+		lineageTag: f12607cf-c84f-400d-8c32-e7566012b180
+		summarizeBy: sum
+		sourceColumn: closed_requests
+
+		annotation SummarizationSetBy = Automatic
+
+	column median_resolution_hours
+		dataType: double
+		lineageTag: 879f5d7b-b6a1-4a12-a713-a323ee44e65c
+		summarizeBy: sum
+		sourceColumn: median_resolution_hours
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition agency = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\DataForge360\data\dataforge_agency_2026-09-01_2026-09-05.csv"),[Delimiter=",", Columns=4, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"label", type text}, {"requests", Int64.Type}, {"closed_requests", Int64.Type}, {"median_resolution_hours", type number}})
+				in
+				    #"Changed Type"
+
+	changedProperty = Name
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

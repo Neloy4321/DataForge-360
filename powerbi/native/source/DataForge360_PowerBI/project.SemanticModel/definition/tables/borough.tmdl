@@ -1,0 +1,75 @@
+table borough
+	lineageTag: d2e10968-968a-457f-93bc-5fa8b2afff75
+
+	measure 'Borough Requests' = SUM('borough'[requests])
+		formatString: #,0
+		lineageTag: 859d1b37-935f-42ca-a08b-4877d19365f8
+
+	measure 'Borough Closed' = SUM('borough'[closed_requests])
+		formatString: #,0
+		lineageTag: 4d5192d0-9025-49c1-bfc6-9f51da12fd4f
+
+	measure 'Borough Open' = [Borough Requests] - [Borough Closed]
+		formatString: #,0
+		lineageTag: 6366bcea-13f0-4ca7-8cc8-df31825dc3ca
+
+	measure 'Borough Closure Rate' = DIVIDE([Borough Closed], [Borough Requests], 0)
+		formatString: 0.00%
+		lineageTag: f70c9de3-1e71-4f40-a759-b45cbf4bb8a9
+
+	measure 'Borough Median Hours' = MAX('borough'[median_resolution_hours])
+		formatString: 0.0
+		lineageTag: 55002bdf-3659-435e-a143-019a86499309
+
+	column label
+		dataType: string
+		lineageTag: 208b029e-17e9-404b-a900-6a0eb55f2e11
+		summarizeBy: none
+		sourceColumn: label
+
+		annotation SummarizationSetBy = Automatic
+
+	column requests
+		dataType: int64
+		formatString: #,0
+		lineageTag: 760fabd4-3cd1-4687-a15d-f6885e1baeab
+		summarizeBy: sum
+		sourceColumn: requests
+
+		annotation SummarizationSetBy = Automatic
+
+	column closed_requests
+		dataType: int64
+		formatString: #,0
+		lineageTag: 8dfd64af-73e7-4081-9cff-624c272d4784
+		summarizeBy: sum
+		sourceColumn: closed_requests
+
+		annotation SummarizationSetBy = Automatic
+
+	column median_resolution_hours
+		dataType: double
+		lineageTag: 15330ba5-faf3-4ac5-acf9-1810931d5ead
+		summarizeBy: sum
+		sourceColumn: median_resolution_hours
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition borough = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\DataForge360\data\dataforge_borough_2026-09-01_2026-09-05.csv"),[Delimiter=",", Columns=4, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"label", type text}, {"requests", Int64.Type}, {"closed_requests", Int64.Type}, {"median_resolution_hours", type number}})
+				in
+				    #"Changed Type"
+
+	changedProperty = Name
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

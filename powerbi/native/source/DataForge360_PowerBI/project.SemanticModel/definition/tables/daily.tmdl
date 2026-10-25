@@ -1,0 +1,80 @@
+table daily
+	lineageTag: 973a0620-4ae1-4f8c-afed-0bcd5b9de6b2
+
+	measure 'Total Requests' = SUM('daily'[requests])
+		formatString: #,0
+		lineageTag: 717e5e7f-023b-4255-8f13-1cf96461b4c2
+
+	measure 'Closed Requests' = SUM('daily'[closed_requests])
+		formatString: #,0
+		lineageTag: c7adb0ab-1eb1-4bf8-a424-b64688445818
+
+	measure 'Not Closed Requests' = [Total Requests] - [Closed Requests]
+		formatString: #,0
+		lineageTag: e685070c-7879-4c5a-b278-5268ab01ee37
+
+	measure 'Closure Rate' = DIVIDE([Closed Requests], [Total Requests], 0)
+		formatString: 0.00%
+		lineageTag: e500d13c-b9d8-4555-924c-9791d32c50ca
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column day
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: deadb709-f210-40d5-b081-51e7e2f0e65d
+		summarizeBy: none
+		sourceColumn: day
+
+		variation Variation
+			isDefault
+			relationship: f4c2c552-2bb6-47db-909c-7cf934a94819
+			defaultHierarchy: LocalDateTable_1c73d932-0fbb-4f1a-98a5-52228097014d.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column day_label
+		dataType: string
+		lineageTag: 76e212e9-3b7b-4f28-b5a9-2dae63a945d6
+		summarizeBy: none
+		sourceColumn: day_label
+
+		annotation SummarizationSetBy = Automatic
+
+	column requests
+		dataType: int64
+		formatString: #,0
+		lineageTag: ed427c20-33df-47af-8f3e-e4690e93ea4c
+		summarizeBy: sum
+		sourceColumn: requests
+
+		annotation SummarizationSetBy = Automatic
+
+	column closed_requests
+		dataType: int64
+		formatString: #,0
+		lineageTag: e8c2525a-c1b8-426a-922f-66b6f375b456
+		summarizeBy: sum
+		sourceColumn: closed_requests
+
+		annotation SummarizationSetBy = Automatic
+
+	partition daily = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\DataForge360\data\dataforge_daily_2026-09-01_2026-09-05.csv"),[Delimiter=",", Columns=3, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"day", type date}, {"requests", Int64.Type}, {"closed_requests", Int64.Type}}),
+				    #"Added Day Label" = Table.AddColumn(#"Changed Type", "day_label", each Date.ToText(Date.From([day]), "MMM dd", "en-US"), type text)
+				in
+				    #"Added Day Label"
+
+	changedProperty = Name
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

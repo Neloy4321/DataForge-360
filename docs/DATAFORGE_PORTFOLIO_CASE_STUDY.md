@@ -1,21 +1,63 @@
 # DataForge 360 — portfolio case study
 
-## Challenge and solution
+## Problem and product
 
-Create a reproducible analytics platform around the real NYC 311 public service-request feed. The Python ingestion layer uses bounded time windows, keyset pagination, defensive validation and atomic raw snapshots with hashes. PostgreSQL staging implements replay-safe upserts; dbt produces a request-grain star schema; Prefect coordinates retries, quality gates and local execution evidence. A read-only Streamlit app explores the modeled data.
+NYC 311 service-request data requires careful ingestion, validation and
+explanation before city-service trends can be interpreted responsibly.
+DataForge 360 is an **independent data engineering and analytics portfolio
+project** that connects a bounded open-data ingestion pipeline with a
+reproducible warehouse, analytics and two reporting surfaces.
 
-A separate **five-page Power BI Desktop report** presents a historical September 1–5, 2026 snapshot from four independent aggregate CSV exports. It is **not a live PostgreSQL connection** and must not be presented as such.
+## Architecture
 
-## Measured sample
+1. **Python + NYC Open Data API:** keyset pagination, bounded date windows,
+   retries, validation, atomic gzip JSONL snapshots and SHA-256 manifests.
+2. **PostgreSQL:** request-grain staging and replay-safe upserts.
+3. **dbt:** four dimensional tables plus request-grain fact, with source,
+   relationship and quality tests.
+4. **Prefect:** retry-aware local workflows, a completeness guard, dbt quality
+   gate and locally recorded run evidence.
+5. **Streamlit:** database-backed read-only operational exploration.
+6. **Power BI Desktop:** an independent five-day historical **aggregate CSV**
+   showcase comprising five polished visual pages; not a live warehouse feed.
 
-The four exports reconcile to 50,740 requests, 47,101 marked Closed, and 3,639 not Closed (92.83% closure-status ratio). Top-15 complaint types account for 30,763 requests, or around 60.63% of the observed total. The figures are historical created-window observations; close-out does not mean a closure event occurred on the creation date and is not a service-level guarantee.
+## Measured five-day sample
 
-## Evidence and limitations
+The supplied aggregate CSV files reconcile to **50,740** service requests,
+**47,101** marked Closed and **3,639** not Closed, a **92.83%** status-based
+close-out ratio. The Top-15 complaints comprise **30,763** requests (60.63%
+of the total), not all complaint categories.
 
-The repository contains offline Python tests and CI workflows for PostgreSQL, dbt, Prefect and Streamlit. Earlier README evidence describes bounded local Windows runs and synthetic CI tests. Those historical results are **not equivalent to fresh full-window, real-world deployment acceptance**.
+This snapshot uses creation dates (September 1–5, 2026). Closure flags
+represent a later observed status; the chart does not assert closures happened
+on the same date, and the ratio is not an SLA or live NYC-wide statistic.
 
-The owner supplied a native five-page Windows-saved PBIX. This file passed static container and definition checks; the Desktop rendering and refresh have not been independently automated in this environment. The binary release still requires committing through an authenticated local Git client. See [Native report handoff](POWER_BI_NATIVE_REPORT.md).
+## Quality and reproducibility
 
-Next steps: end-to-end reproducibility on the full input window, late-status change handling, scheduler evidence, data-quality monitoring, performance measurements, and a request-grain/warehouse-connected Power BI report.
+GitHub includes offline Python tests, PostgreSQL integration, dbt tests,
+Prefect acceptance checks and Streamlit dashboard checks. The repository
+README records bounded Windows and GitHub CI evidence; those historical runs
+must not be confused with re-execution during this PBIX handoff.
 
-**Skills:** Python, data ingestion, REST APIs, PostgreSQL, SQL, dbt, dimensional modeling, Prefect, GitHub Actions, Streamlit, DAX, Power BI, data quality and technical communication.
+The native Power BI artifact has five report pages, 86 native visuals,
+five decorative backgrounds, and an included editable `.pbip` source.
+Artifact structure and aggregate reconciliation were inspected in the
+release package. The owner reported successful Windows Power BI usage and
+saving of the final `.pbix`; independent automated visual rendering is pending.
+
+## Honest limitations and future work
+
+- Source-completeness and any scheduler uptime require independent testing.
+- The five-day import is static and CSV-based, not live/incremental.
+- Cross-filtering aggregate tables would create misleading comparisons; the
+  request-grain dbt star schema must be used for integrated analysis.
+- Source record statuses can change after their creation dates.
+- Request-level privacy and embedded data sources must be reviewed before
+  publishing native PBIX files publicly.
+- No claim of official NYC agency endorsement or production deployment.
+
+## Relevant skills
+
+**Python, REST APIs, PostgreSQL, dimensional modeling, dbt, Prefect,
+SQL, data quality, automated testing, Streamlit, Power BI, DAX,
+analytics communication and reproducibility.**

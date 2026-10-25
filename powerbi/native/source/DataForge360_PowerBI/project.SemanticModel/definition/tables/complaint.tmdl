@@ -1,0 +1,75 @@
+table complaint
+	lineageTag: b5a8aa3f-cf6e-48b1-ad2e-e2e344ffc127
+
+	measure 'Complaint Requests' = SUM('complaint'[requests])
+		formatString: #,0
+		lineageTag: 6d55d072-a2af-4979-a4a2-8ed198077f18
+
+	measure 'Complaint Closed' = SUM('complaint'[closed_requests])
+		formatString: #,0
+		lineageTag: 658b4a09-026f-4c9c-966f-15f7c2950752
+
+	measure 'Complaint Open' = [Complaint Requests] - [Complaint Closed]
+		formatString: #,0
+		lineageTag: 18ddfdfb-e332-4788-8162-6ac5acf071a2
+
+	measure 'Complaint Closure Rate' = DIVIDE([Complaint Closed], [Complaint Requests], 0)
+		formatString: 0.00%
+		lineageTag: 214325d1-12e8-4e16-adb1-48aca6c64884
+
+	measure 'Complaint Median Hours' = MAX('complaint'[median_resolution_hours])
+		formatString: 0.0
+		lineageTag: 26c4eeb7-87fc-40e8-bd49-e92607af7ea7
+
+	column label
+		dataType: string
+		lineageTag: 27cba230-42b6-4f92-8f9f-3939b1bb3da8
+		summarizeBy: none
+		sourceColumn: label
+
+		annotation SummarizationSetBy = Automatic
+
+	column requests
+		dataType: int64
+		formatString: #,0
+		lineageTag: e77e4331-2c1d-4e24-86d8-8fc9113307d0
+		summarizeBy: sum
+		sourceColumn: requests
+
+		annotation SummarizationSetBy = Automatic
+
+	column closed_requests
+		dataType: int64
+		formatString: #,0
+		lineageTag: 7004cb0e-5656-4cea-a93d-d99ca343a18c
+		summarizeBy: sum
+		sourceColumn: closed_requests
+
+		annotation SummarizationSetBy = Automatic
+
+	column median_resolution_hours
+		dataType: double
+		lineageTag: 1981f1bf-9f92-4f58-8795-9c205f6a2c06
+		summarizeBy: sum
+		sourceColumn: median_resolution_hours
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition complaint = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\DataForge360\data\dataforge_complaint_2026-09-01_2026-09-05.csv"),[Delimiter=",", Columns=4, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"label", type text}, {"requests", Int64.Type}, {"closed_requests", Int64.Type}, {"median_resolution_hours", type number}})
+				in
+				    #"Changed Type"
+
+	changedProperty = Name
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

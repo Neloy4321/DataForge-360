@@ -1,0 +1,5 @@
+relationship f4c2c552-2bb6-47db-909c-7cf934a94819
+	joinOnDateBehavior: datePartOnly
+	fromColumn: daily.day
+	toColumn: LocalDateTable_1c73d932-0fbb-4f1a-98a5-52228097014d.Date
+

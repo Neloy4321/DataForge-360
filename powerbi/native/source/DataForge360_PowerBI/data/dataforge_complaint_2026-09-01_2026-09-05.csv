@@ -1,0 +1,16 @@
+label,requests,closed_requests,median_resolution_hours
+Illegal Parking,7821,7821,1.5
+Noise - Residential,4637,4637,1.0
+Noise - Street/Sidewalk,3191,3191,0.9
+Blocked Driveway,2493,2493,1.7
+UNSANITARY CONDITION,2385,2261,264.1
+Street Condition,1421,1312,46.7
+Dirty Condition,1141,1128,48.4
+PAINT/PLASTER,1124,1084,187.8
+Abandoned Vehicle,1117,1117,2.3
+PLUMBING,1090,1031,221.9
+Encampment,934,900,1.5
+Noise,907,899,92.3
+Water Maintenance,870,845,10.9
+Noise - Commercial,849,849,0.7
+WATER LEAK,783,755,207.5

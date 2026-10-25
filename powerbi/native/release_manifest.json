@@ -1,0 +1,42 @@
+{
+  "release": "DataForge 360 Cinematic V5.1",
+  "date": "2026-10-25",
+  "pbix_filename": "DataForge360_Cinematic_v5.1.pbix",
+  "pbix_sha256": "f7e42a731065facc6595c2daecf64bdac7f7b9f87b01ddf3eeef541bee05c286",
+  "pbix_size_bytes": 684602,
+  "pbix_zip_crc": "passed",
+  "pbix_json_documents": "parsed",
+  "pbix_embedded_model": "present",
+  "pages": {
+    "Executive Overview": 19,
+    "Agency Performance": 17,
+    "Borough Analytics": 16,
+    "Complaint Intelligence": 15,
+    "Data Quality & Method": 19
+  },
+  "visual_count": 86,
+  "cinematic_background_assets": 5,
+  "source_csv_aggregates": {
+    "daily": {
+      "rows": 5,
+      "requests": 50740,
+      "closed": 47101
+    },
+    "agency": {
+      "rows": 14,
+      "requests": 50740,
+      "closed": 47101
+    },
+    "borough": {
+      "rows": 6,
+      "requests": 50740,
+      "closed": 47101
+    },
+    "complaint": {
+      "rows": 15,
+      "requests": 30763,
+      "closed": 30323
+    }
+  },
+  "status_note": "Static artifact validation only; Power BI Desktop rendering and refreshed data connections not executed in this environment."
+}
