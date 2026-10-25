@@ -27,8 +27,11 @@ run (**38 dbt passes, zero changed rows on replay, succeeded**) on 2026-10-24.
 This is bounded smoke validation, not full-window or scheduler acceptance.
 Phase 5 introduces a read-only Streamlit analytics dashboard and a reproducible
 Power BI Desktop specification. Synthetic PostgreSQL+dbt metrics and the actual
-Streamlit app both passed isolated GitHub Actions CI; Windows visual validation
-and a native `.pbix` report are separate pending tasks.
+Streamlit app both passed isolated GitHub Actions CI; The project owner has now saved and supplied a five-page cinematic native
+Power BI `.pbix` on Windows (2026-10-25); the supplied binary passed static
+archive/definition checks, but independent GUI rendering and a full refresh
+have not been executed here. The **binary is not yet committed** to GitHub;
+see [native Power BI handoff](docs/POWER_BI_NATIVE_REPORT.md).
 
 ## What works today
 
@@ -243,8 +246,29 @@ $env:DATABASE_URL = 'postgresql://dataforge:' + [System.Uri]::EscapeDataString($
 
 Open `http://127.0.0.1:8501`. No public port, DB password or API key should
 be exposed. See the [dashboard runbook](docs/ANALYTICS_DASHBOARD.md) and
-[Power BI Desktop model and DAX](docs/POWER_BI.md). A native `.pbix` is not
-provided or claimed to be tested yet.
+[Power BI Desktop model and DAX](docs/POWER_BI.md). A separate Windows-saved native `.pbix` has been provided by the owner and
+inspected structurally; it remains to be installed into this Git repository
+through the local binary release handoff. See [native report notes](docs/POWER_BI_NATIVE_REPORT.md).
+
+## Native Power BI Desktop delivery (2026-10-25)
+
+The project owner provided a Windows-saved cinematic Power BI report with **five
+pages** (Executive, Agency, Borough, Complaint, Quality) and a historical
+September 1–5, 2026 aggregate snapshot (**50,740** requests; **47,101**
+marked Closed; Top-15 complaints **30,763** requests). The PBIX container,
+embedded report definitions and included CSV aggregate totals passed static
+checks. The owner reported successful Windows opening, page navigation and
+save; an independent Windows Desktop test/refresh was **not run here**.
+
+The four report CSVs are separate aggregates, **not** the PostgreSQL/dbt
+request-grain star schema; no valid cross-filtering across the aggregate
+tables is implied. This is a non-live portfolio snapshot, not an official
+NYC dashboard or an SLA. The binary PBIX is part of the owner's local
+release handoff and **not yet committed to the repository**; avoid making
+a public-download claim until that Git step is completed.
+
+- [Native PBIX verification and release instructions](docs/POWER_BI_NATIVE_REPORT.md)
+- [Portfolio case study](docs/DATAFORGE_PORTFOLIO_CASE_STUDY.md)
 
 ## Post-backfill data quality report
 
@@ -280,7 +304,7 @@ With `DATABASE_URL` set, the JSON report is written to the ignored
 | 2 | PostgreSQL staging, replay-safe upserts and integration tests | Implemented; GitHub PostgreSQL CI passed and user confirmed local 100-row load |
 | 3 | dbt transformations, star schema and data quality | Implemented; GitHub dbt CI and user Windows 38/38 local dbt acceptance passed |
 | 4 | Prefect orchestration, retries and observability | Isolated Prefect+PostgreSQL+dbt CI passed; user-provided Windows logs show five successful non-capped daily source windows (50,740 rows read), including a three-day backfill; scheduler and independent database reconciliation pending |
-| 5 | Streamlit/Power BI analytics | Dashboard SQL + Streamlit UI verified in GitHub CI; user-supplied Windows screenshots confirm five-day 50,740-row Activity, Operations and aggregated-map views; native Power BI `.pbix` pending |
+| 5 | Streamlit/Power BI analytics | Dashboard SQL + Streamlit UI verified in GitHub CI; user-supplied Windows screenshots confirm five-day 50,740-row Activity, Operations and aggregated-map views; owner saved native Power BI `.pbix` on Windows; binary Git commit and independent Desktop visual test pending |
 | 6 | Hosting, benchmarking, end-to-end acceptance | Planned |
 
 ## Privacy and limitations
